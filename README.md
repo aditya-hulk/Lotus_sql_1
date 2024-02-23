@@ -1305,6 +1305,1350 @@ RNo  City
 ![Alt text](image-87.png)
 - db se data ko fetch karne ke liye select statement use karte
 ```sql
+/*
+Select Statement
+   - Specific row
+   - all row
+   - Top n row
+   - Top n% of row
+   - Distinct row
+*/
+Use MyDatabase;
 
+Create Table Employee
+(
+	empId Int,
+	empName Varchar(50),
+	dept Varchar(20),
+	salary Int,
+	City Varchar(50),
+	joinYear Int
+)
+
+Insert into Employee(empId,empName,dept,salary,City,joinYear)
+					Values(1005,'Linda','IT',3200,NULL,2022);
+Insert into Employee(empId,empName,dept,salary,City,joinYear) 
+					Values(1006,'Tony','HR',6700,'Delhi',1990);
+Insert into Employee(empId,empName,dept,salary,City,joinYear) 
+					Values(1007,'Joshep','Account',7800,'Delhi',2020);
+Insert into Employee(empId,empName,dept,salary,City,joinYear) 
+					Values(1009,'Alice','Sales',2100,'London',2021);
+Insert into Employee(empId,empName,dept,salary,City,joinYear)  
+				Values(1009,'Mangu','IT',2200,NULL,2022);
+Insert into Employee(empId,empName,dept,salary,City,joinYear)  
+			Values(1010,'David','HR',1100,'Dhaka',2022);
+Insert into Employee(empId,empName,dept,salary,City,joinYear)  
+				Values(1011,'Taylor','Dev',78966,'NewYork',2022);
+Insert into Employee(empId,empName,dept,salary,City,joinYear) 
+					Values(1012,'Mike','Dev',7654,'DC',2019);
+Insert into Employee(empId,empName,dept,salary,City,joinYear) 
+						Values(1013,'Susan','Welfare',7538,'London',2022);
+Insert into Employee(empId,empName,dept,salary,City,joinYear) 
+					Values(1014,'Zacab','IT',6886,'Kabul',2018);
+Insert into Employee(empId,empName,dept,salary,City,joinYear) 
+					Values(1015,'Minton','IT',6789,'Kabul',2012);
+
+--To fetch all rows
+Select * from Employee;
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mike	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+1014	Zacab	IT		6886	Kabul	2018
+1015	Minton	IT		6789	Kabul	2012
+*/
+
+-- Fetch specific row
+   -- humko keval empId aur empName hi chaiye
+Select empId,empName from Employee;
+/*
+1005	Linda
+1006	Tony
+1007	Joshep
+1009	Alice
+1009	Mangu
+1010	David
+1011	Taylor
+1012	Mike
+1013	Susan
+1014	Zacab
+1015	Minton
+*/
+
+-- Humko yadi iska order change karna hai
+  -- empName ko pehle display karna hia
+Select empName,empId,dept,salary,joinYear from Employee;
+/*
+Linda	1005	IT	3200	2022
+Tony	1006	HR	6700	1990
+Joshep	1007	Account	7800	2020
+Alice	1009	Sales	2100	2021
+Mangu	1009	IT	2200	2022
+David	1010	HR	1100	2022
+Taylor	1011	Dev	78966	2022
+Mike	1012	Dev	7654	2019
+Susan	1013	Welfare	7538	2022
+Zacab	1014	IT	6886	2018
+Minton	1015	IT	6789	2012
+*/
+
+--Observation : 
+     -- Ye kahli display ki liye hota hai
+	 -- but physical table par iska koyi impact nahi hota.
+	 -- yaha resultSet data ko change karke aapko data show karta hai.
+
+--Data bahut jyada hota hai
+  -- hume sirf specific number of data hi dekhna hai
+    -- only 4 records hi dekhna hai tab
+Select Top 4 * from Employee;
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+
+observation:
+    Employee Table ek resultSet create karenga.
+	 ye resultSet 4 row ko show kar denga.
+*/
+
+-- aap * ki jagah column ka name bhi de sakte
+Select Top 2 empId,empName from Employee;
+/*
+1005	Linda
+1006	Tony
+*/
+
+-- Jo bhi Entire hamara ResultSet hai 
+   -- uska hume 20% ye 50% hi data dekhna hai
+Select Top 2 Percent * from Employee;
+--Ouptut:
+--1005	Linda	IT	3200	NULL	2022
+
+-- 20% of specific data
+Select Top 20 Percent empName from Employee;
+/*
+Linda
+Tony
+Joshep
+*/
 ```
+### About distinct
+```sql
+--Total Dept kitne hai? kyuki dept mein kafi repeat ho rahe hai.
+  -- mane unique value nikalni hai
+    -- so use Distinct
+-- Select Distinct Which_Col_Unique_Value_U_Requrie from Table
+Select Distinct dept from Employee;
+/*
+Account
+Dev
+HR
+IT
+Sales
+Welfare
+
+Observation:
+   Repeated chije na dikhake, unique value ko display kar diya.
+*/
+
+-- hume multiple col ki uniuque value ko display karana hai
+ -- dept aur empId  isko mila  kar ke 
+     -- unique value ko generate karenga.
+ Select Distinct dept,empId from Employee;
+ /*
+Account	1007
+Dev		1011
+Dev		1012
+HR		1006
+HR		1010
+IT		1005
+IT		1009
+IT		1014
+IT		1015
+Sales	1009
+Welfare	1013
+
+-- Observation:
+     -- Total hamare paas 11 record hai
+	 -- empId unique hai and combo mein sare unique hi hia.
+ */
+
+  Select Distinct dept,city from Employee;
+  /*
+Account	Delhi
+Dev		DC
+Dev		NewYork
+HR		Delhi
+HR		Dhaka
+IT		NULL
+IT		Kabul
+Sales	London
+Welfare	London
+
+Observation:
+       - abhi 9 records hi mil rahe hai.
+	   - city aur dept mein unique value 9 hai aur 2 repeated value hai..
+	          isiliye usko diplay nhi kiya gya
+			  IT NULL
+			  IT Kabul  - ye duplicacy hai
+  */
+```
+### Concept of fully qualified name
+```sql
+-- Concept of full qualified name
+   -- Employee table hamare MyDatabase mein create hai
+   -- yadi aapne current database change kar liya
+
+   -- 1) via command
+   create database TestDatabase;
+   use TestDatabase;
+```
+### 2) via ui
+![Alt text](image-88.png)
+```sql
+ -- and try
+   Select * from Employee;
+   --Error: Invalid object name 'Employee'.
+
+   --DatabaseName.UserName.TableName  = Fully qualified Name
+    Select * from MyDatabase.dbo.Employee;
+	/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mike	Dev		7654	DC	2019
+1013	Susan	Welfare	7538	London	2022
+1014	Zacab	IT		6886	Kabul	2018
+1015	Minton	IT		6789	Kabul	2012
+	*/
+```
+### Where clause
+- data ko filter karne ke liye, 
+- data ko limit karne ke liye 
+- resultset ko narrow karne ke liye, we use where clause
+![Alt text](image-89.png)
+```sql
+Use MyDatabase;
+/*
+Where clause
+   Comparison operator: =,>,>=,<,<=,<>
+*/
+Select  * from Employee;
+
+-- hume sirf slective data ko check karna hai
+  -- Hume pura record nikalna hai jiska empId 1005 hai
+Select * from Employee Where empId = 1005;
+--1005	Linda	IT	3200	NULL	2022
+
+-- find record whose name is Linda
+Select * from Employee Where empName='Linda';
+--1005	Linda	IT	3200	NULL	2022
+
+-- find record whose dept is IT
+Select * from Employee Where dept='IT';
+/*
+1005	Linda	IT	3200	NULL	2022
+1009	Mangu	IT	2200	NULL	2022
+1014	Zacab	IT	6886	Kabul	2018
+1015	Minton	IT	6789	Kabul	2012
+*/
+
+--Greater Than operator
+--Jiski 4K ke upar salary hai unke naam
+Select * from Employee Where salary > 4000;
+/*
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mike	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+1014	Zacab	IT		6886	Kabul	2018
+1015	Minton	IT		6789	Kabul	2012
+*/
+
+--Greater than equal to
+-- jiska salary 7800 utni ya usse upar ho
+Select * from Employee Where salary >= 7800;
+/*
+1007	Joshep	Account	7800	Delhi	2020
+1011	Taylor	Dev		78966	NewYork	2022
+*/
+
+--Less than
+--  salary less than 4K
+Select * from Employee Where salary < 4000;
+/*
+1005	Linda	IT		3200	NULL	2022
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+*/
+
+--less than equal to
+--    find sale less than equal to 3200
+Select * from Employee Where salary <= 3200;
+/*
+1005	Linda	IT		3200	NULL	2022
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+*/
+
+--Not equal
+-- 3200 nahi hai jinki sal
+Select * from Employee Where salary <> 3200;
+/*
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mike	Dev		7654	DC	    2019
+1013	Susan	Welfare	7538	London	2022
+1014	Zacab	IT		6886	Kabul	2018
+1015	Minton	IT		6789	Kabul	2012
+*/
+```
+
+### Logical operator with where clause
+- multiple condition ko join karne ke liye, where clause ke sath AND use karte hai.
+- Between operator, particualr value search karta hai from the set of values.
+
+![Alt text](image-90.png)
+```sql
+/*
+Logical operators
+    AND	, OR, IN, BETWEEN,EXISTS,LIKE,NOT,IS NULL
+*/
+Select * from Employee;
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mike	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+1014	Zacab	IT		6886	Kabul	2018
+1015	Minton	IT		6789	Kabul	2012
+*/
+
+-- AND operator
+-- Hume wo employee chaiye jinki city Delhi aur sal 3k se upar
+Select * from Employee where City='Delhi' AND salary > 3000;
+/*
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+
+Observation:
+   Yadi aapki dono condition satisfy ho gyi.
+     tabhi wo data resultSet mein add kar denga
+	  and aap result set ko dekh paonge.
+*/
+
+--OR operator
+-- Hume wo employee chaiye jinki city Delhi ho ya sal 3k se upar ho
+Select * from Employee where City='Delhi' OR salary > 3000;
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mike	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+1014	Zacab	IT		6886	Kabul	2018
+1015	Minton	IT		6789	Kabul	2012
+*/
+
+--Between Operator
+-- 2K aur 5K  ke bich ke salary nikalni hai 
+Select * from Employee where  salary  BETWEEN 2000 AND 5000;
+/*
+1005	Linda	IT		3200	NULL	2022
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+
+ ye dono value include hoti hai search mein
+   indono ke range ki bich ki value add hongi result set mein
+*/
+
+Select * from Employee where  salary  BETWEEN 1100 AND 3200;
+/*
+1005	Linda	IT		3200	NULL	2022
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+
+1100(minimum range) bhi include hue
+  3200(maximum range) bhi
+   aur unke bich ki sal bhi result set mein add hue
+*/
+
+--Exist operator
+  -- return type true or false
+   -- use with condtions
+IF EXISTS(Select * from Employee where empId=1001)
+Print 'YES'
+ELSE
+Print 'NO'
+--Output : NO
+
+IF EXISTS(Select * from Employee where empId=1007)
+Print 'YES'
+ELSE
+Print 'NO'
+--Output : YES
+
+--NOT operator
+  -- apke logical operator ke menaing ko reverse kar deta hai
+IF NOT EXISTS(Select * from Employee where empId=1007)
+Print 'YES'
+ELSE
+Print 'NO'
+--Output : NO
+
+--IS NULL
+ -- Null value or blank ke andar diff hota hai
+
+ -- For blank
+ Select * from Employee where city='';
+ -- Output: Since we dont have any record whose city is blank, so no data 
+      -- but query is fine 
+
+-- for null
+ Select * from Employee where city is null;
+ /*
+ 1005	Linda	IT	3200	NULL	2022
+1009	Mangu	IT	2200	NULL	2022
+ */
+
+ -- Like operator
+   -- used for complex searching
+-- wo empName jiska starting charcter A hai
+Select * from Employee where empName LIKE 'A%';
+/*
+LIKE 'A%';
+      % ye ek sustitue hai dusri value ke liye
+Jise A se name start hua, uska baad ka character kuch bhi ho sakta hia
+    % usse replace marta.
+
+1009	Alice	Sales	2100	London	2021
+*/
+
+-- aisa name fetch karo, jisme D letter exist karta ho 
+    -- kisi bhi position par
+Select * from Employee where empName LIKE '%D%';
+/*
+1005	Linda	IT	3200	NULL	2022
+1010	David	HR	1100	Dhaka	2022
+*/
+
+-- aisa name fetch karo, jisme D letter exist karta ho 
+    -- last position par
+Select * from Employee where empName LIKE '%D';
+/*
+1010	David	HR	1100	Dhaka	2022
+*/
+```
+# 9. Like Command
+- like operator ye ek logical operator hai
+- jo string ko kisi pattern ke sath match karne ka kam karta hai
+- pattern may be expression or wild card char
+- eg emp name search karna hai joh A se suru hote hai.
+
+![Alt text](image-91.png)
+- like operator ke sath kisi bhi character String ko pattern ke sath match karte.
+
+![Alt text](image-92.png)
+```sql
+use MyDatabase;
+/*
+	Wild Character :  % (Percent)
+	    % means any String of 0 or more character
+*/
+Select * from Employee;
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mike	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+1014	Zacab	IT		6886	Kabul	2018
+1015	Minton	IT		6789	Kabul	2012
+*/
+-- Find Employee details whose name is Linda
+Select * from Employee where empName = 'Linda';
+--1005	Linda	IT	3200	NULL	2022
+
+--Find employee details whose name starts with a character like a
+  -- aise query ke liye use karte hai like operator with pattern
+Select * from Employee where empName Like 'a%';
+/*
+1009	Alice	Sales	2100	London	2021
+
+   a% - a ke kitne bhi charcter ho, but pehla a ho
+*/
+
+--Find employee details whose name starts with a character like ma
+Select * from Employee where empName Like 'ma%';
+--1009	Mangu	IT	2200	NULL	2022
+
+--Find employee details whose name ends with a character like a
+Select * from Employee where empName Like '%a';
+--1005	Linda	IT	3200	NULL	2022
+
+--Find employee details whose name ends with a character like ab
+Select * from Employee where empName Like '%ab';
+--1014	Zacab	IT	6886	Kabul	2018
+
+--Find employee details whose name contains a
+   -- kisi bhi position par ho a
+Select * from Employee where empName Like '%a%';
+/*
+1005	Linda	IT		3200	NULL	2022
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1013	Susan	Welfare	7538	London	2022
+1014	Zacab	IT		6886	Kabul	2018
+*/
+```
+### Underscore
+```sql
+/*
+	Wild card : _ Underscore
+	_  ==> It represent single charcter
+*/
+-- aisa empName jisme 1 hi charcter ho
+Select * from Employee where empName like '_';
+-- Output: Query executed succssfully but in our db no employee having 
+   -- single charcter name
+
+-- aisa empName jisme 4 hi charcter ho
+Select * from Employee where empName like '____';
+/*
+1006	Tony	HR	6700	Delhi	1990
+1012	Mike	Dev	7654	DC		2019
+
+so 4 baar underscore use kiya hai query mein.
+*/
+
+-- aisa empName jisme 4 hi charcter ho aur uska starting charcter T se suru ho
+Select * from Employee where empName like 'T___';
+/*
+1006	Tony	HR	6700	Delhi	1990
+
+T___ ===> T ke sath 3 underscore liye.
+*/
+```
+### More wildcard charcters
+```sql
+/*
+	Wildcard - [list of charcter]
+	  Represents any single charcter within specified set
+*/
+
+-- Hume multiple name lene hai
+   -- jiska name a l m se start hota hai
+Select * from Employee where empName like '[alm]%';
+/*
+1005	Linda	IT		3200	NULL	2022
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1012	Mike	Dev		7654	DC		2019
+1015	Minton	IT		6789	Kabul	2012
+
+[alm]% ==> a se, l se and m se start hota ho wo sare name
+*/
+
+/*
+	WildCard : ^ Negate Operator
+*/
+
+-- hume aise name chaiye 
+   -- jiska charcter a/l/m se suru nhi hota hai
+    -- isko chodke sare name
+
+Select * from Employee where empName like '[^alm]%';
+/*
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshep	Account	7800	Delhi	2020
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1013	Susan	Welfare	7538	London	2022
+1014	Zacab	IT		6886	Kabul	2018
+*/
+
+/*
+	Wildcard [charcter-charcter]:
+	   represents any single charcter within the specfied range.
+*/
+--hume wo sare name chiaye
+  -- jo ki a se lekar d tak aate ho
+Select * from Employee where empName like '[a-d]%';
+/*
+1009	Alice	Sales	2100	London	2021
+1010	David	HR		1100	Dhaka	2022
+
+[a-d] ==> a-d tak ke range ke 
+   mane isme a,b,c,d 
+     agar koyi name start ho raha hai a/b/c/d 
+to wo result set me aa javenga.
+*/
+
+--hume wo sare name chiaye
+  -- jo ki a se lekar m tak aate ho
+Select * from Employee where empName like '[a-m]%';
+/*
+1005	Linda	IT		3200	NULL	2022
+1007	Joshep	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1012	Mike	Dev		7654	DC		2019
+1015	Minton	IT		6789	Kabul	2012
+*/
+```
+# 10. Exist and Not Exist sub queries in sql
+- kisi value ko table mein check karna
+- ki vo value table mein exist karti hai ya nahi
+
+![Alt text](image-93.png)
+![Alt text](image-94.png)
+```sql
+use MyDatabase;
+
+update  Employee set empName='Joshef' where empId=1007;
+update  Employee set empName='Mikea' where empId=1012;
+update  Employee set empName='Mac_Son' where empId=1014;
+update  Employee set empName='Mac_Gill' where empId=1015;
+
+select * from Employee;
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshef	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mikea	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+1014	Mac_Son	 IT		6886	Kabul	2018
+1015	Mac_Gill IT		6789	Kabul	2012
+*/
+
+Select 1;
+/*
+   1  - Result me aa raha hai
+   aur message mein (1 row affected)
+
+   yaha return 1 row ho rahi hai
+*/
+
+Select 0;
+/*
+   0  - Result me aa raha hai
+   aur message mein (1 row affected)
+
+   yaha return 1 row ho rahi hai
+*/
+
+Select Null;
+/*
+   Null  - Result me aa raha hai
+   aur message mein (1 row affected)
+
+   yaha return 1 row ho rahi hai
+*/
+select * from Employee where EXISTS(Select 1);
+select * from Employee where EXISTS(Select 0);
+select * from Employee where EXISTS(Select Null);
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshef	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mikea	Dev		7654	DC	2	019
+1013	Susan	Welfare	7538	London	2022
+1014	Mac_Son	IT		6886	Kabul	2018
+1015	Mac_Gill	IT	6789	Kabul	2012
+
+1 row return ho rahi 
+   mane exist ye true return kar raha hai.
+*/
+
+Create Table #temp
+(
+	Id Int
+)
+
+insert into #temp values(1);
+
+Select * from #temp;
+--1  id mein 1 aaya ResultSet ke andar
+
+select * from Employee where EXISTS(Select Id from #temp);
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshef	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mikea	Dev		7654	DC	2019
+1013	Susan	Welfare	7538	London	2022
+1014	Mac_Son	IT		6886	Kabul	2018
+1015	Mac_Gill	IT	6789	Kabul	2012
+*/
+
+-- ab yadi mein temprary table drop kardu 
+drop table #temp;
+
+--ab fhir se temp table create karte 
+  -- par koyi row add nahi karte
+Create Table #temp
+(
+	Id Int
+)
+
+Select Id from #temp
+-- Result set mein kuch nhi aaya
+
+-- ab select query chalao exist wali
+select * from Employee where EXISTS(Select Id from #temp);
+-- Query executed but no output is there
+
+select * from Employee where EXISTS(Select empId from Employee where salary > 4000);
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshef	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mikea	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+1014	Mac_Son	IT		6886	Kabul	2018
+1015	Mac_Gill	IT	6789	Kabul	2012
+
+ye to sara data return kar raha hai
+   since exist mein joh subquery chal rahi hai
+     wo non zero row provide kar rahi hai
+
+Select * from employee where Exist(subquery)
+
+Select * from employee where True
+   so return all thing
+
+  Funda:
+     0 row - false
+	 1 or multiple - true
+*/
+
+-- for 0 row
+select * from Employee where EXISTS(Select empId from Employee where salary > 80000);
+/*
+Query executed but blank output
+ since subquery return 0 row
+  for 0 row exist return false
+
+ Select * from employee where Exist(subquery)
+
+Select * from employee where False
+   so return nothing
+*/
+```
+```sql
+use MyDatabase;
+/*
+   Exist in If condition
+	How to use Exist operator with If condition
+*/
+If EXISTS(Select * from Employee where empId=1001)
+ Begin
+  Select * from  Employee where empId=1009
+ End
+Else 
+ Begin
+  Select * from  Employee where empId=1012
+ End
+
+/*
+1012	Mikea	Dev	7654	DC	2019
+
+Simple If-else condition
+  yaha else block chala hai
+*/
+
+If EXISTS(Select * from Employee where empId=1005)
+ Begin
+  Select * from  Employee where empId=1009
+ End
+Else 
+ Begin
+  Select * from  Employee where empId=1012
+ End
+/*
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+
+Yaha If block chal gya 
+  since condition is true.
+*/
+
+/*
+	Not Exists
+*/
+If NOT EXISTS(Select * from Employee where empId=1005)
+ Begin
+  Select * from  Employee where empId=1009
+ End
+Else 
+ Begin
+  Select * from  Employee where empId=1012
+ End
+/*
+1012	Mikea	Dev	7654	DC	2019
+
+Not exists reverse kar denga output ko
+  isiliye yaha else chalenga.
+*/
+```
+### Co-related query
+- depened on outer query
+- ye main query ke data ko use karti hai, uske refrence ko use karti hai
+- isiliye isko corelated subquery kehte hai
+
+### Diff
+### 1. Non correlated query 
+- aap isse indiviudal/independently  execute kar sakte hai.
+
+### 2. Corelated subquery
+- aap isse indiviudal/independently  execute nhi kar sakte hai.
+- kyuki iske andar refrence outer query ka use hota hai.
+
+![Alt text](image-95.png)
+- aapke main table aapke 10 record hai
+- to har baar 1 row ke liye 10 baar sub query execute hongi.
+- mane 10*10 = 100 baar subquery chalengi.
+
+![Alt text](image-96.png)
+```sql
+/*
+	EXISTS Corelated subquery
+*/
+
+--Non corelated subquery
+Select * from Employee where EXISTS(Select * from Employee where salary > 7000);
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshef	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mikea	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+1014	Mac_Son	IT		6886	Kabul	2018
+1015	Mac_Gill	IT	6789	Kabul	2012
+
+Jo subquery hai wo non zero element return kar rahi hai.
+ so Exists mein true aaya
+Thats why sare records display ho rahe hai ResultSet mein
+
+ye jo subquery individually bhi run ho rahi hai
+
+yaha sara data show ho raha hai
+*/
+
+-- Ab meri requirement hai
+  -- ki Exist ke sath mein wohi data aaye
+    -- jo subquery mein aa raha hai.
+     -- for that use co-related subquery
+
+ -- coreleated subquery mein jo data hota hai
+     -- wo outer query ke data ko reflect karta hai
+Select * from Employee emp 
+	where EXISTS(Select * from Employee 
+	    where 
+		   empId=emp.empId AND salary > 7000);
+/*
+1007	Joshef	Account	7800	Delhi	2020
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mikea	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+
+empId --> ye subquery se hai 
+  emp --> alias name
+emp.empId --> ye outerquery se hai (ye outer query ke col ko refer karenga)
+
+Hume data wohi mil raha jiski salary 7k se upar hai.
+
+ye query outer query ke ref ke bina execute ho nhi sakti
+
+And operation ke wajah se hume desired data mil raha hai.
+*/
+```
+### Corelated subquery kaam kaise kar rahi hai.
+![Alt text](image-97.png)
+- CQT se empId 1001 MQT se compare karenga
+- yadi match kar gya tab salary comparison honga
+- to 3k > 5k false, so data add nhi honga resultset mein
+- fhir CQT ka empId 1001 MQT ke remaining empId se compare honga
+- match na hone ke karan, koyi data rst mein add nhi honga.
+
+![Alt text](image-98.png)
+- CQT se empId 1002 MQT se compare karenga
+- yadi match kar gya tab salary comparison honga
+- to 4k > 5k false, so data add nhi honga resultset mein
+- fhir CQT ka empId 1002 MQT ke remaining empId se compare honga
+- match na hone ke karan, koyi data rst mein add nhi honga.
+
+![Alt text](image-100.png)
+- CQT se empId 1003 MQT se compare karenga
+- yadi match kar gya tab salary comparison honga
+- to 6k > 5k true, so data add  honga resultset mein
+- fhir CQT ka empId 1003 MQT ke remaining empId se compare honga
+- match na hone ke karan, koyi data rst mein add nhi honga.
+
+![Alt text](image-99.png)
+![Alt text](image-101.png)
+![Alt text](image-102.png)
+![Alt text](image-103.png)
+# 11. Foreign key with Cascade Delete and update.
+- 2 table ke andar yadi aapka primary key aur foreign key ka relationship hai.
+- So aap yadi master table se koyi data ko delete karte ho
+- to uska related data jo child table mein hai wo automatically delete hota hai.
+-In case of cascade.
+
+![Alt text](image-104.png)
+- On Delete Cascade/ On update cascade both are optional
+- iske sath action hote hai, jaise in case of delte cascade
+-  no action/  cacade / set null /set defualt
+
+- by default no action hota hai
+-  In case of No Action ==> master table se wo row ka data aap delete nhi kar sakte jiska refrence child table mein hai. Normal behaviour.
+- Cascade ==> parent table se data delete to child se bhi honga
+- Set NUll ==> Parent table mein foreign key ke value wo Null set kar denga. So data delete nhi hua, but fk null ho gyi..
+- Set Default ==> Parent table se data delete honga but child table mein col ke defualt value set ho javengi.
+
+![Alt text](image-105.png)
+![Alt text](image-106.png)
+```sql
+use MyDatabase;
+
+--Parent_ child relation create karte.
+
+Create table Customers
+(
+	Cust_Id Int Primary Key,
+	Cust_Name Varchar(100)
+)
+
+Insert into Customers(Cust_Id,Cust_Name) Values(1,'Singh');
+Insert into Customers(Cust_Id,Cust_Name) Values(2,'John');
+Insert into Customers(Cust_Id,Cust_Name) Values(3,'Smith');
+Insert into Customers(Cust_Id,Cust_Name) Values(4,'Linda');
+
+Create table Orders
+(
+	Order_Id Int Identity(1,1),
+	cust_Id Int,
+	Item Varchar(100)
+	FOREIGN KEY(cust_Id) REFERENCES Customers(Cust_Id) 
+)
+
+-- once relationship established
+ -- hum wohi data Order table mei daal sakte
+   -- mane jo cust_id Customers table mein hongi
+    -- ussi se related id aur item hum Order mein daal pavenge.
+Insert Into Orders(cust_Id,Item) values (1,'Pen');
+Insert Into Orders(cust_Id,Item) values (2,'Mouse');
+Insert Into Orders(cust_Id,Item) values (2,'Keyboard');
+Insert Into Orders(cust_Id,Item) values (3,'CPu');
+Insert Into Orders(cust_Id,Item) values (4,'Pad');
+
+--ek aisi value ki cust_id insert karte jo 
+ -- Customers table mein exist nahi karti ho.
+Insert Into Orders(cust_Id,Item) values (10,'Pad');
+/*
+Error:
+The INSERT statement conflicted with the FOREIGN KEY constraint
+"FK__Orders__Item__2A164134". The conflict occurred in database "MyDatabase",
+table "dbo.Customers", column 'Cust_Id'.
+*/
+
+--Check data
+Select * from Customers;
+/*
+1	Singh
+2	John
+3	Smith
+4	Linda
+*/
+
+Select * from Orders;
+/*
+Or_id  C_id Item
+1		1	Pen
+2		2	Mouse
+3		2	Keyboard
+4		3	CPu
+5		4	Pad
+*/
+
+--Default behaviour ==> NO action
+-- Yadi hum parent table se koyi data delete karte hai
+  -- tab child table se data delte hota hai?
+delete from Customers where Cust_Id=1;
+/*
+The DELETE statement conflicted with the REFERENCE constraint "FK__Orders__Item__2A164134".
+The conflict occurred in database "MyDatabase", table "dbo.Orders", column 'cust_Id'.
+
+Nhi delete karne diya.
+  jis key ko hum delete kar rahe hai
+    wo key hamara child table mein exist karta hai so conflict paida honga.
+*/
+```
+### ON Delete CAscade
+```sql
+-- requirement 
+-- hum parent table se key delete karte hai yadi
+ -- to uska child table ka key bhi delete ho jave
+   -- use Option of On Cascase Delete 
+    -- we have 2 option for this
+	 -- 1. Table Alter kare
+	 -- 2. Table Drop karke iski defination ko change kare.
+
+--2) let's drop child table 
+   -- and recreate it while changing it's defination
+drop table Orders;
+
+Create table Orders
+(
+	Order_Id Int Identity(1,1),
+	cust_Id Int,
+	Item Varchar(100)
+	FOREIGN KEY(cust_Id) REFERENCES Customers(Cust_Id) 
+	ON DELETE CASCADE
+)
+/*
+aB iska behaviour aisa honga.
+   ki apne parent table se key delete kari
+    to child table se bhi apne aap wo key delete ho javengi
+*/
+
+--Now insert the data
+Insert Into Orders(cust_Id,Item) values (1,'Pen');
+Insert Into Orders(cust_Id,Item) values (2,'Mouse');
+Insert Into Orders(cust_Id,Item) values (2,'Keyboard');
+Insert Into Orders(cust_Id,Item) values (3,'CPu');
+Insert Into Orders(cust_Id,Item) values (4,'Pad');
+
+--Check data
+Select * from Customers;
+/*
+1	Singh
+2	John
+3	Smith
+4	Linda
+*/
+
+Select * from Orders;
+/*
+Or_id  C_id Item
+1		1	Pen
+2		2	Mouse
+3		2	Keyboard
+4		3	CPu
+5		4	Pad
+*/
+
+-- Now delete sth from master table and check the result
+  -- parent se id 1 delte
+delete from Customers where Cust_Id=1;
+-- 1 row affected
+
+--Check data
+Select * from Customers;
+/*
+2	John
+3	Smith
+4	Linda
+*/
+
+Select * from Orders;
+/*
+Or_id  C_id Item
+2		2	Mouse
+3		2	Keyboard
+4		3	CPu
+5		4	Pad
+*/
+/*
+ On Delete Cascade mein data child table se bhi delete ho jata hai
+*/
+```
+### Set NULL
+```sql
+-- meri requirement 
+ -- Parent table se data delete ho jave
+  -- but child table se key ye Null set ho jave.
+
+drop table Orders;
+
+Create table Orders
+(
+	Order_Id Int Identity(1,1),
+	cust_Id Int,
+	Item Varchar(100)
+	FOREIGN KEY(cust_Id) REFERENCES Customers(Cust_Id) 
+	ON DELETE SET NULL
+)
+
+-- Insert data
+ -- Remember: cust_Id 1 ye master table se delete ho chuka hai.So ignore it
+Insert Into Orders(cust_Id,Item) values (2,'Mouse');
+Insert Into Orders(cust_Id,Item) values (2,'Keyboard');
+Insert Into Orders(cust_Id,Item) values (3,'CPu');
+Insert Into Orders(cust_Id,Item) values (4,'Pad');
+
+--Check data
+Select * from Customers;
+/*
+2	John
+3	Smith
+4	Linda
+*/
+
+Select * from Orders;
+/*
+Or_id  C_id Item
+1		2	Mouse
+2		2	Keyboard
+3		3	CPu
+4		4	Pad
+*/
+
+--delete sth from master table and see result
+delete from Customers where Cust_Id=2;
+
+--Check data
+Select * from Customers;
+/*
+3	Smith
+4	Linda
+*/
+
+Select * from Orders;
+/*
+Or_id  C_id Item
+1	  NULL	Mouse
+2	  NULL	Keyboard
+3		3	CPu
+4		4	Pad
+
+Yaha child table i.e Order table mein
+ customer_id ka column mein 
+   particular value null set ho gyi
+*/
+```
+### Set Default
+```sql
+drop table Orders;
+drop table Customers;
+
+Create table Customers
+(
+	Cust_Id Int Primary Key,
+	Cust_Name Varchar(100)
+)
+
+Insert into Customers(Cust_Id,Cust_Name) Values(1,'Singh');
+Insert into Customers(Cust_Id,Cust_Name) Values(2,'John');
+Insert into Customers(Cust_Id,Cust_Name) Values(3,'Smith');
+Insert into Customers(Cust_Id,Cust_Name) Values(4,'Linda');
+
+-- aap chahte hai
+  -- ki parent table se data to delete ho jave
+  -- lekin child table mein Instead of Null value 
+  -- default value set ho jave.
+
+Create table Orders
+(
+	Order_Id Int Identity(1,1),
+	cust_Id Int NOT	NULL DEFAULT 1,
+	Item Varchar(100)
+	FOREIGN KEY(cust_Id) REFERENCES Customers(Cust_Id) 
+	ON DELETE SET DEFAULT
+)
+/*
+  	cust_Id Int NOT	NULL DEFAULT 1,==> 
+	    1 ye wo key hai jo aapka master table mein hai..
+	yaha par aap koyi bhi wo key mention kar sakte jo Master table mein hai
+	 since child table mein jo FK hai 
+	   basically wo master table ki primary key hai 
+*/
+Insert Into Orders(cust_Id,Item) values (1,'Pen');
+Insert Into Orders(cust_Id,Item) values (2,'Mouse');
+Insert Into Orders(cust_Id,Item) values (2,'Keyboard');
+Insert Into Orders(cust_Id,Item) values (3,'CPu');
+Insert Into Orders(cust_Id,Item) values (4,'Pad');
+
+
+--Check data
+Select * from Customers;
+/*
+ciD  cName
+1	Singh
+2	John
+3	Smith
+4	Linda
+*/
+
+Select * from Orders;
+/*
+Or_id  C_id Item
+1		1	Pen
+2		2	Mouse
+3		2	Keyboard
+4		3	CPu
+5		4	Pad
+*/
+
+-- ab yadi hum master table se custid 2 delete kare
+  -- so child table mein custId 2 ke jagah
+   -- default id 1 aane ko hona
+delete from Customers where Cust_Id=2;
+
+--Check data
+Select * from Customers;
+/*
+ciD  cName
+1	Singh
+3	Smith
+4	Linda
+*/
+
+Select * from Orders;
+/*
+Or_id  C_id Item
+1		1	Pen
+2		1	Mouse
+3		1	Keyboard
+4		3	CPu
+5		4	Pad
+*/
+```
+### On Update
+```sql
+--ON Update
+drop table Orders;
+drop table Customers;
+
+Create table Customers
+(
+	Cust_Id Int Primary Key,
+	Cust_Name Varchar(100)
+)
+
+Insert into Customers(Cust_Id,Cust_Name) Values(1,'Singh');
+Insert into Customers(Cust_Id,Cust_Name) Values(2,'John');
+Insert into Customers(Cust_Id,Cust_Name) Values(3,'Smith');
+Insert into Customers(Cust_Id,Cust_Name) Values(4,'Linda');
+
+--child table mein change kare
+Create table Orders
+(
+	Order_Id Int Identity(1,1),
+	cust_Id Int,
+	Item Varchar(100)
+	FOREIGN KEY(cust_Id) REFERENCES Customers(Cust_Id) 
+	ON UPDATE CASCADE
+)
+/*
+	ON UPDATE CASCADE ==>
+	  Yadi aapka master table mein primary key mein change hota hai
+	    to uska reflection child table mein bhi aavenga.
+*/
+
+Insert Into Orders(cust_Id,Item) values (1,'Pen');
+Insert Into Orders(cust_Id,Item) values (2,'Mouse');
+Insert Into Orders(cust_Id,Item) values (2,'Keyboard');
+Insert Into Orders(cust_Id,Item) values (3,'CPu');
+Insert Into Orders(cust_Id,Item) values (4,'Pad');
+
+
+--Check data
+Select * from Customers;
+/*
+ciD  cName
+1	Singh
+2	John
+3	Smith
+4	Linda
+*/
+
+Select * from Orders;
+/*
+Or_id  C_id Item
+1		1	Pen
+2		2	Mouse
+3		2	Keyboard
+4		3	CPu
+5		4	Pad
+*/
+
+-- Yadi hum master table mein custId 2 ki jagha 25 karte hai
+  -- to child table mein bhi 25 custId reflect hona mangta
+   -- instead of 2
+Update Customers set Cust_Id = 25 where Cust_Id=2;
+
+--Check data
+Select * from Customers;
+/*
+ciD  cName
+1	Singh
+3	Smith
+4	Linda
+25	John
+*/
+
+Select * from Orders;
+/*
+Or_id  C_id Item
+1		1	Pen
+2		25	Mouse
+3		25	Keyboard
+4		3	CPu
+5		4	Pad
+*/
+```
+# 12. Sql String function
 
