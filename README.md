@@ -2651,4 +2651,1293 @@ Or_id  C_id Item
 */
 ```
 # 12. Sql String function
+![Alt text](image-107.png)
+![Alt text](image-108.png)
+```sql
+use MyDatabase;
+
+/*
+  ASCII : retrun the  ASCII code value of a character
+    Lower case character : 97 - 122
+	Upper Case Character : 65 - 90
+*/
+Select ASCII('a');
+-- 97
+
+Select ASCII('A');
+-- 65
+
+Select ASCII('z');
+-- 122
+
+-- Char: Convert an ASCII  value to a character
+Select Char(97);
+-- a
+
+Select Char(77);
+-- M
+
+/*
+	CHARINDEX : Search for a substring inside a String;
+	              starting from a specified location  and 
+				    return the position of the substring
+	Syntax :
+	    CHARINDEX(expressionToFind, expressionToSearch);
+*/
+
+SELECT CHARINDEX('ze','Loutsamaze');
+-- 9  ==> left side se aapki 9th position par hai ze
+
+SELECT CHARINDEX('ma','Loutsamaze');
+-- 7 
+
+/*
+	CONCAT : Join two or more String into one string
+	Syntax :
+	      CONCAT(String_value1,String_value2,. ....... [String_valuen]);
+*/
+
+Select CONCAT('LotusAmaze','Solutions');
+-- LotusAmazeSolutions
+
+-- aap space ke liye 1 value le sakte
+  --3 value/argument concat
+Select CONCAT('LotusAmaze',' ','Solutions');
+-- LotusAmaze Solutions
+
+-- another approach
+Select CONCAT('LotusAmaze',' Solutions');
+-- LotusAmaze Solutions
+
+/*
+		CONCAT_WS() : Concatenate multiple String with a separator
+		                   into a Single string
+		Syn : CONCAT_WS(separator, argument1,argument2,...... [argumentN] )
+*/
+Select  CONCAT_WS('*','Lotus','Amaze','IT');
+-- Lotus*Amaze*IT
+
+Select  CONCAT_WS('_','Lotus','Amaze','IT');
+-- Lotus_Amaze_IT
+
+/*
+   LEFT : Extract a given number of characters  from a character String
+              starting from the Left
+	Syntax :
+	      LEFT(character_expression, integer_expression);
+*/
+Select LEFT('LotusAmaze',5);
+-- Lotus
+
+/*
+   RIGHT : Extract a given number of characters  from a character String
+              starting from the RIGHT
+	Syntax :
+	      RIGHT(character_expression, integer_expression);
+*/
+Select RIGHT('LotusAmaze',5);
+-- Amaze
+
+--LEN : Return a number of characters from a character String
+Select LEN('Lotusamaze IT Solutions');
+-- 23
+
+--Lower : Convert a given string to lowerCase;
+Select Lower('Lotusamaze IT Solutions');
+-- lotusamaze it solutions
+
+--Upper : Convert a given string to UpperCase
+Select Upper('Lotusamaze IT Solutions');
+-- LOTUSAMAZE IT SOLUTIONS
+
+
+--LTRIM : Return a new String from a specified String 
+            -- after removing all 
+			  -- leading blank spaces.
+Select LTRIM('       Aditya');
+-- Aditya
+
+--RTRIM : Return a new String from a specified String 
+            -- after removing all 
+			  -- trailing blank spaces.
+Select RTRIM('Rathor        ');
+-- Rathor
+
+--Normal Space problem
+Select CONCAT('Lotusamaze      ','           solutions');
+-- Lotusamaze                 solutions
+
+Select CONCAT(RTRIM('Lotusamaze      '),'           solutions');
+-- Lotusamaze           solutions
+
+Select CONCAT('Lotusamaze      ',LTRIM('           solutions'));
+-- Lotusamaze      solutions
+
+Select CONCAT(RTRIM('Lotusamaze      '),LTRIM('           solutions'));
+--Lotusamazesolutions
+
+/*
+	PATINDEX : Return the starting position of the first occurence 
+	             of  a pattern in a String
+	Syntax :
+	       PATINDEX('%pattern%',expression);
+*/
+Select PATINDEX('%ama%','lotusamaze');
+-- 6
+
+Select PATINDEX('ama%','lotusamaze');
+-- 0 
+-- ama% ==> aapka pattern ama se start hona chiaye 
+-- 0 ==> nhi hai start isse 
+
+
+Select PATINDEX('ama%','amalotusamaze');
+-- 1
+
+Select PATINDEX('%ama','lotusamaze');
+-- 0 
+-- %ama ==> aapka expression ama se end hona chiaye 
+-- 0 ==> nhi hai isiliyte
+
+Select PATINDEX('%ama','lotusamazeama');
+-- 11
+
+/*
+   REPLACE : Replace the all ocurrences of a subString,
+                   within a String,
+				    with another SubString
+	Syntax:
+	   REPLACE(String_exprssion,String_Pattern, String replacement)
+*/
+
+Select REPLACE('Lotusamaze123','123',' IT Solutions');
+-- Lotusamaze IT Solutions
+
+/*
+	STUFF : DElete a part of String  and then insert 
+	          another subString into the String,
+			Starting at the specified position.
+	Syntax :
+	     STUFF(Character_Expression,start, length, replace_with_expression)
+		
+	       Character_Expression 
+	        start - kaha se delete karna start karna hai
+	       length - kaha tak delete karna hai
+	       replace_with_expression
+*/
+Select STUFF('Lotusamaze123',3,4,'IT Solutions');
+-- LoIT Solutionsmaze123
+/*
+        ('Lotusamaze123',3,4,'IT Solutions');
+Character_Expression  : Lotusamaze123
+start - kaha se delete karna start karna hai : 3
+length - kaha tak delete karna hai  : 4
+
+                  so delte hua     : tusa
+replace_with_expression : 'IT Solutions'
+*/
+```
+# 13. Cast and Convert function in sql
+- kuch aisi specific requirements hoti hai jaha hume sirf convert function ko use karna hota hai.
+
+![Alt text](image-109.png)![Alt text](image-110.png) 
+### Cast 
+- ANSI standard mane global function, kisi bhi data base mein apply hota.
+
+![Alt text](image-111.png)
+```sql
+use MyDatabase;
+
+create table Employee1
+(
+	empId int,
+	date_of_join DateTime,
+	First_Name Varchar(70),
+	Last_Name Varchar(70),
+	Education_Id Int,
+	Salary Int,
+	joinYear Int,
+	DeptId Int,
+	City_Id Int
+)
+
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1001,'2020-09-24 12:11:30.233',
+   'John','Yang',1,3000,2021,1,1);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1002,'2020-04-11 11:12:35.233',
+   'Smith','Ting',2,4000,2020,3,2);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1003,'2020-03-03 09:11:30.233',
+   'King','Amaze',4,6000,2019,2,4);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1004,'2020-02-22 09:11:30.233',
+   'Millia','King',7,5500,2021,5,8);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1005,'2020-01-15 12:11:30.233',
+   'Linda','Reina',4,5500,2022,5,6);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1006,'2020-05-09 09:11:30.233',
+   'Tony','Blele',2,5500,1990,3,4);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1007,'2020-09-12 12:11:30.233',
+   'Joshep','Desuja',5,7800,2020,4,8);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1009,'2020-09-11 06:11:30.233',
+   'Alice','Rocky',6,2100,2021,6,3);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1009,'2020-09-12 05:11:30.233',
+   'Mangu','Desa',6,2200,2022,8,7);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(1010,'2020-09-12 04:11:30.233',
+   'David','Kulum',7,1100,2022,2,7);
+Insert Into Employee1(empId,date_of_join,First_Name,Last_Name,Education_Id,Salary,
+   joinYear,DeptId,City_Id) Values(NULL,'2020-09-12 06:11:30.233',
+   NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
+ Select * from Employee1;
+/*
+empId   date_of_join           FName    LName  EId  Sal    JYear  DId  CId  
+1001	2020-09-24 12:11:30.233	John	Yang	1	3000	2021	1	1
+1002	2020-04-11 11:12:35.233	Smith	Ting	2	4000	2020	3	2
+1003	2020-03-03 09:11:30.233	King	Amaze	4	6000	2019	2	4
+1004	2020-02-22 09:11:30.233	Millia	King	7	5500	2021	5	8
+1005	2020-01-15 12:11:30.233	Linda	Reina	4	5500	2022	5	6
+1006	2020-05-09 09:11:30.233	Tony	Blele	2	5500	1990	3	4
+1007	2020-09-12 12:11:30.233	Joshep	Desuja	5	7800	2020	4	8
+1009	2020-09-11 06:11:30.233	Alice	Rocky	6	2100	2021	6	3
+1009	2020-09-12 05:11:30.233	Mangu	Desa	6	2200	2022	8	7
+1010	2020-09-12 04:11:30.233	David	Kulum	7	1100	2022	2	7
+NULL	2020-09-12 06:11:30.233	NULL	NULL  NULL	NULL	NULL  NULL  NULL
+*/
+
+-- Abhi hume empId,date_of_join,First_Name aur Last_name itna dikahana hai
+Select empId,date_of_join,First_Name,Last_Name from Employee1;
+/*
+1001	2020-09-24 12:11:30.233	John	Yang
+1002	2020-04-11 11:12:35.233	Smith	Ting
+1003	2020-03-03 09:11:30.233	King	Amaze
+1004	2020-02-22 09:11:30.233	Millia	King
+1005	2020-01-15 12:11:30.233	Linda	Reina
+1006	2020-05-09 09:11:30.233	Tony	Blele
+1007	2020-09-12 12:11:30.233	Joshep	Desuja
+1009	2020-09-11 06:11:30.233	Alice	Rocky
+1009	2020-09-12 05:11:30.233	Mangu	Desa
+1010	2020-09-12 04:11:30.233	David	Kulum
+NULL	2020-09-12 06:11:30.233	NULL	NULL
+*/
+
+--Hume Date_Of_Join as a varchar display karna hai
+   -- so use cast() for casting DateTime datatype to Varchar
+Select empId,CAST(date_of_join As Varchar),First_Name,Last_Name from Employee1;
+/*
+eId      (No coloumn Name) 
+1001	Sep 24 2020 12:11PM	John	Yang
+1002	Apr 11 2020 11:12AM	Smith	Ting
+1003	Mar  3 2020  9:11AM	King	Amaze
+1004	Feb 22 2020  9:11AM	Millia	King
+1005	Jan 15 2020 12:11PM	Linda	Reina
+1006	May  9 2020  9:11AM	Tony	Blele
+1007	Sep 12 2020 12:11PM	Joshep	Desuja
+1009	Sep 11 2020  6:11AM	Alice	Rocky
+1009	Sep 12 2020  5:11AM	Mangu	Desa
+1010	Sep 12 2020  4:11AM	David	Kulum
+NULL	Sep 12 2020  6:11AM	NULL	NULL
+
+Observation : 
+   Cast karne baad column name (No coloumn Name) aisa 
+      display ho raha..
+  Give it proper name
+*/
+Select empId,CAST(date_of_join As Varchar)as join_date,
+               First_Name,Last_Name from Employee1;
+/*
+eId      join_date          FName   LName
+1001	Sep 24 2020 12:11PM	John	Yang
+1002	Apr 11 2020 11:12AM	Smith	Ting
+1003	Mar  3 2020  9:11AM	King	Amaze
+1004	Feb 22 2020  9:11AM	Millia	King
+1005	Jan 15 2020 12:11PM	Linda	Reina
+1006	May  9 2020  9:11AM	Tony	Blele
+1007	Sep 12 2020 12:11PM	Joshep	Desuja
+1009	Sep 11 2020  6:11AM	Alice	Rocky
+1009	Sep 12 2020  5:11AM	Mangu	Desa
+1010	Sep 12 2020  4:11AM	David	Kulum
+NULL	Sep 12 2020  6:11AM	NULL	NULL
+*/
+
+-- If i want to convert function here
+  -- Convert(DataType_U_Want_To_Conver, ColumnName)
+Select empId,CONVERT(Varchar,date_of_join)as join_date,
+               First_Name,Last_Name from Employee1;
+/*
+eId      join_date          FName   LName
+1001	Sep 24 2020 12:11PM	John	Yang
+1002	Apr 11 2020 11:12AM	Smith	Ting
+1003	Mar  3 2020  9:11AM	King	Amaze
+1004	Feb 22 2020  9:11AM	Millia	King
+1005	Jan 15 2020 12:11PM	Linda	Reina
+1006	May  9 2020  9:11AM	Tony	Blele
+1007	Sep 12 2020 12:11PM	Joshep	Desuja
+1009	Sep 11 2020  6:11AM	Alice	Rocky
+1009	Sep 12 2020  5:11AM	Mangu	Desa
+1010	Sep 12 2020  4:11AM	David	Kulum
+NULL	Sep 12 2020  6:11AM	NULL	NULL
+*/
+
+--Yadi hume join_date ko varchar mein keval 10 charcter tak display karana hai
+Select empId,CAST(date_of_join As Varchar(10))as join_date,
+               First_Name,Last_Name from Employee1;
+Select empId,CONVERT(Varchar(10),date_of_join)as join_date,
+               First_Name,Last_Name from Employee1;
+/*
+1001	Sep 24 202	John	Yang
+1002	Apr 11 202	Smith	Ting
+1003	Mar  3 202	King	Amaze
+1004	Feb 22 202	Millia	King
+1005	Jan 15 202	Linda	Reina
+1006	May  9 202	Tony	Blele
+1007	Sep 12 202	Joshep	Desuja
+1009	Sep 11 202	Alice	Rocky
+1009	Sep 12 202	Mangu	Desa
+1010	Sep 12 202	David	Kulum
+NULL	Sep 12 202	NULL	NULL
+*/
+
+--Target: hume empId aur FirstName ko join karke
+   -- 1 col display karna hai
+select First_Name + '-' + empId,date_of_join,Last_Name,Salary,JoinYear from Employee1;
+/*
+Conversion failed when converting the varchar value 'John-' to data type int.
+
+==> First_Name datatype is Varchar
+    empId datatype is Integer
+
+	So aap combine nhi kar sakte.. 
+	 Yaha implicit conversion hua but successfull nhi hone ke karna
+	   Error throw kiya
+
+	Aapko cast/convert karna honga
+*/
+
+select First_Name + '-' + CAST(empId as Varchar),
+      date_of_join,Last_Name,Salary,JoinYear from Employee1;
+
+select (First_Name + '-' + CAST(empId as Varchar)) as FNameIdCombo ,
+      date_of_join,Last_Name,Salary,JoinYear from Employee1;
+
+/*
+FNameIdCombo
+John-1001	2020-09-24 12:11:30.233	Yang	3000	2021
+Smith-1002	2020-04-11 11:12:35.233	Ting	4000	2020
+King-1003	2020-03-03 09:11:30.233	Amaze	6000	2019
+Millia-1004	2020-02-22 09:11:30.233	King	5500	2021
+Linda-1005	2020-01-15 12:11:30.233	Reina	5500	2022
+Tony-1006	2020-05-09 09:11:30.233	Blele	5500	1990
+Joshep-1007	2020-09-12 12:11:30.233	Desuja	7800	2020
+Alice-1009	2020-09-11 06:11:30.233	Rocky	2100	2021
+Mangu-1009	2020-09-12 05:11:30.233	Desa	2200	2022
+David-1010	2020-09-12 04:11:30.233	Kulum	1100	2022
+NULL		2020-09-12 06:11:30.233	NULL	NULL	NULL
+*/
+
+--Hume pata karna hai ki ek hi date ke andar kitne logo ne join kiya
+-- since abhi hamara datatype datetime hai
+Select count(empId) from Employee1 Group By date_of_join;
+/*
+1
+1
+1
+1
+1
+1
+1
+1
+0
+1
+1
+
+Observation:
+ har date ka group bana hai, date same hia and time alag hai..
+
+ So hum date_of_Join ko datetime se date mein convert kar sakte
+*/
+Select count(empId) from Employee1 Group By Cast(date_of_join as Date);
+Select count(empId) from Employee1 Group By Convert(date,date_of_join);
+/*
+1
+1
+1
+1
+1
+1
+3
+1
+
+Observation: 
+   apki 3 date same hai
+
+check karna phir se..lotusAmaze mein 4 date aa rahi hai.
+  
+*/
+```
+### Specific Convert() requirement
+```sql
+/*
+  CONVERT
+   CONVERT(DATATYPE [(LEN)],EXPRESSION,[STYLE])
+
+   8	-	hh:mm:ss
+   101	-	mm/dd/yyyy
+   102	-	yyyy.mm.dd
+   103	-	dd/mm/yyyy
+   104	-	dd.mm.yyyy
+
+specific requirement ke liye hum Covert() dhadlle se use karte
+ har country format hota hia
+   us ka mm/dd/yyyy hai
+   hamara dd/mm/yyyy
+har country ke format ka code hota hai
+*/
+-- hume date format ko change karna hai
+Select empId,CONVERT(Varchar,date_of_join,8)as join_date,
+               First_Name,Last_Name from Employee1;
+/*
+1001	12:11:30	John	Yang
+1002	11:12:35	Smith	Ting
+1003	09:11:30	King	Amaze
+1004	09:11:30	Millia	King
+1005	12:11:30	Linda	Reina
+1006	09:11:30	Tony	Blele
+1007	12:11:30	Joshep	Desuja
+1009	06:11:30	Alice	Rocky
+1009	05:11:30	Mangu	Desa
+1010	04:11:30	David	Kulum
+NULL	06:11:30	NULL	NULL
+*/
+Select empId,CONVERT(Varchar,date_of_join,101)as join_date,
+               First_Name,Last_Name from Employee1;
+/*
+1001	09/24/2020	John	Yang
+1002	04/11/2020	Smith	Ting
+1003	03/03/2020	King	Amaze
+1004	02/22/2020	Millia	King
+1005	01/15/2020	Linda	Reina
+1006	05/09/2020	Tony	Blele
+1007	09/12/2020	Joshep	Desuja
+1009	09/11/2020	Alice	Rocky
+1009	09/12/2020	Mangu	Desa
+1010	09/12/2020	David	Kulum
+NULL	09/12/2020	NULL	NULL
+*/
+
+Select empId,CONVERT(Varchar,date_of_join,102)as join_date,
+               First_Name,Last_Name from Employee1;
+/*
+1001	2020.09.24	John	Yang
+1002	2020.04.11	Smith	Ting
+1003	2020.03.03	King	Amaze
+1004	2020.02.22	Millia	King
+1005	2020.01.15	Linda	Reina
+1006	2020.05.09	Tony	Blele
+1007	2020.09.12	Joshep	Desuja
+1009	2020.09.11	Alice	Rocky
+1009	2020.09.12	Mangu	Desa
+1010	2020.09.12	David	Kulum
+NULL	2020.09.12	NULL	NULL
+*/
+
+Select empId,CONVERT(Varchar,date_of_join,103)as join_date,
+               First_Name,Last_Name from Employee1;
+/*
+1001	24/09/2020	John	Yang
+1002	11/04/2020	Smith	Ting
+1003	03/03/2020	King	Amaze
+1004	22/02/2020	Millia	King
+1005	15/01/2020	Linda	Reina
+1006	09/05/2020	Tony	Blele
+1007	12/09/2020	Joshep	Desuja
+1009	11/09/2020	Alice	Rocky
+1009	12/09/2020	Mangu	Desa
+1010	12/09/2020	David	Kulum
+NULL	12/09/2020	NULL	NULL
+*/
+
+Select empId,CONVERT(Varchar,date_of_join,104)as join_date,
+               First_Name,Last_Name from Employee1;
+/*
+1001	24.09.2020	John	Yang
+1002	11.04.2020	Smith	Ting
+1003	03.03.2020	King	Amaze
+1004	22.02.2020	Millia	King
+1005	15.01.2020	Linda	Reina
+1006	09.05.2020	Tony	Blele
+1007	12.09.2020	Joshep	Desuja
+1009	11.09.2020	Alice	Rocky
+1009	12.09.2020	Mangu	Desa
+1010	12.09.2020	David	Kulum
+NULL	12.09.2020	NULL	NULL
+*/
+```
+# 14. Merge Statement
+![Alt text](image-112.png)![Alt text](image-113.png)
+- update case mein 2 key hai 
+ 1) key bole to pk
+ 2) non key bole to baki ke column
+ - so non key src mein alag aur target mein jab alag ho tab hum update use karte.
+ ![Alt text](image-114.png)![Alt text](image-115.png)![Alt text](image-116.png)![Alt text](image-117.png)
+ ```sql
+ Use MyDatabase;
+
+Create table product_source
+(
+	p_id Int Primary key,
+	p_name Varchar(100),
+	p_price Int
+)
+
+Create table product_target
+(
+	p_id Int Primary key,
+	p_name Varchar(100),
+	p_price Int
+)
+
+insert into product_source(p_id,p_name,p_price) 
+              values(101,'Mouse',100);
+insert into product_source(p_id,p_name,p_price) 
+              values(102,'Pad',110);
+insert into product_source(p_id,p_name,p_price) 
+              values(103,'Cpu',250);
+insert into product_source(p_id,p_name,p_price) 
+              values(104,'hardDisk',300);
+
+insert into product_target(p_id,p_name,p_price) 
+              values(101,'Mouse',100);
+insert into product_target(p_id,p_name,p_price) 
+              values(102,'Pad',110);
+insert into product_target(p_id,p_name,p_price) 
+              values(103,'Cpu',250);
+insert into product_target(p_id,p_name,p_price) 
+              values(106,'Keyboard',300);
+
+select * from product_source;
+/*
+101	Mouse		100
+102	Pad			110
+103	Cpu			250
+104	hardDisk	300
+*/
+
+select * from product_target;
+/*
+101	Mouse		100
+102	Pad			110
+103	Cpu			250
+106	Keyboard	300
+*/
+
+-- soruce table ki 104 id ye target table mein exist nhi karti
+  -- so insert karo target table mein merge karke
+      -- hume data ko sync karna hai
+
+/*
+	Merge Into target_table_Name  trg_table_alias 
+	 Using source_table-Name src_table_alias
+	 (then_condition) i.e On(conditon)
+When Not Matched By Target (AGAR aapka target table mein data koyi match nhi ho ra)
+  Then
+  Insert (TARGET TABLE MEIN= PROVde target_co info)
+Values(srouce se fetch karke dena)
+
+*/
+MERGE INTO product_target trg
+USING product_source src
+ON(trg.p_id = src.p_id)
+WHEN NOT MATCHED BY TARGET
+THEN
+INSERT(p_id,p_name,p_price)
+Values(src.p_id,src.p_name,src.p_price);
+
+select * from product_source;
+/*
+101	Mouse		100
+102	Pad			110
+103	Cpu			250
+104	hardDisk	300
+*/
+select * from product_target;
+/*
+101	Mouse		100
+102	Pad			110
+103	Cpu			250
+104	hardDisk	300
+106	Keyboard	300
+
+Observation: 
+ Ab target table mein 104 ye id ka sara data aa gya
+ table sync ho gya
+*/
+
+update  product_source 
+    set p_name = 'Mouse-II' where p_id=101;
+
+update  product_source 
+    set p_price = 450 where p_id=103;
+
+select * from product_source;
+/*
+101	Mouse-II	100
+102	Pad			110
+103	Cpu			450
+104	hardDisk	300
+*/
+select * from product_target;
+/*
+101	Mouse		100
+102	Pad			110
+103	Cpu			250
+104	hardDisk	300
+106	Keyboard	300
+*/
+
+/*
+Scenario -2 
+  product_source 101 id mein  Mouse-II
+    and in target mein Mouse
+ 
+  Similary for id 103 
+     src - 450 price
+	 trg  - 250
+
+	Non primary key mein data change hai so we need 
+	 to syn the data via update merge it
+*/
+
+/*
+ WHEN MATCHED THEN UPDATE( key match hai tab update karo)
+ SET (kis column ko update karna hai) trg col = src col
+
+   
+*/
+MERGE INTO product_target trg
+USING product_source src
+ON(trg.p_id = src.p_id)
+WHEN NOT MATCHED BY TARGET
+THEN
+INSERT(p_id,p_name,p_price)
+Values(src.p_id,src.p_name,src.p_price)
+WHEN MATCHED THEN UPDATE
+SET trg.p_name = src.p_name,
+    trg.p_price = src.p_price;
+
+select * from product_source;
+/*
+101	Mouse-II	100
+102	Pad			110
+103	Cpu			450
+104	hardDisk	300
+*/
+
+select * from product_target;
+/*
+101	Mouse-II	100
+102	Pad			110
+103	Cpu			450
+104	hardDisk	300
+106	Keyboard	300
+*/
+
+/*
+   106	id ka data
+   target mein hai but src mein nahi hai
+   so delte it in order to sync
+
+   WHEN NOT MATCHED BY SOURCE
+     THEN DELETE
+*/
+MERGE INTO product_target trg
+USING product_source src
+ON(trg.p_id = src.p_id)
+WHEN NOT MATCHED BY TARGET
+THEN
+INSERT(p_id,p_name,p_price)
+Values(src.p_id,src.p_name,src.p_price)
+WHEN MATCHED THEN UPDATE
+SET trg.p_name = src.p_name,
+    trg.p_price = src.p_price
+WHEN NOT MATCHED BY SOURCE
+  THEN DELETE;
+
+select * from product_source;
+/*
+101	Mouse-II	100
+102	Pad			110
+103	Cpu			450
+104	hardDisk	300
+*/
+
+select * from product_target;
+/*
+101	Mouse-II	100
+102	Pad			110
+103	Cpu			450
+104	hardDisk	300
+
+WHEN NOT MATCHED BY TARGET then   insert
+   When mathed then update
+WHEN NOT MATCHED BY Source then   delete
+*/
+ ```
+# 15. Sql Joins
+- hume multiple table se information retreieve karna hota hai us case mein hum joins ka concept use karte hai
+- 2 tables ko join karne ke liye at least ek common column hona chaiye.
+
+![Alt text](image-118.png)![Alt text](image-119.png)![Alt text](image-120.png)![Alt text](image-121.png)
+```sql
+use MyDatabase;
+
+create table Employee2
+(
+	emp_id int Primary key,
+	emp_Name Varchar(150)
+)
+
+insert into Employee2(emp_id,emp_Name) Values(1,'Anil');
+insert into Employee2(emp_id,emp_Name) Values(2,'Suresh');
+insert into Employee2(emp_id,emp_Name) Values(3,'Mahesh');
+insert into Employee2(emp_id,emp_Name) Values(4,'Mohan');
+insert into Employee2(emp_id,emp_Name) Values(5,'Sohan');
+
+create table EmployeeDetails
+(
+	emp_id int not null,
+	emp_age int not null,
+	emp_address Varchar(200),
+	emp_salary decimal(8,2)
+)
+
+Insert into EmployeeDetails Values(1,33,'Delhi',2923.90);
+Insert into EmployeeDetails Values(2,43,'NCR',3444.90);
+Insert into EmployeeDetails Values(3,22,'Haryana',3456.90);
+Insert into EmployeeDetails Values(4,65,'UP',5433.90);
+Insert into EmployeeDetails Values(8,34,'Delhi',4332.90);
+Insert into EmployeeDetails Values(10,32,'Delhi',4554.90);
+
+select * from Employee2;
+/*
+1	Anil
+2	Suresh
+3	Mahesh
+4	Mohan
+5	Sohan
+*/
+
+Select * from EmployeeDetails;
+/*
+1	33	Delhi	2923.90
+2	43	NCR		3444.90
+3	22	Haryana	3456.90
+4	65	UP		5433.90
+8	34	Delhi	4332.90
+10	32	Delhi	4554.90
+*/
+```
+### Terminology
+![Alt text](image-122.png)![Alt text](image-123.png)![Alt text](image-124.png)
+#### Inner Join mein 2 table ka common data aapko output mein mil javenga
+```sql
+Select emp.emp_id,emp.emp_Name,ed.emp_age,ed.emp_address,ed.emp_salary
+from Employee2 emp
+         INNER JOIN 
+     EmployeeDetails ed
+ON(emp.emp_id = ed.emp_id);
+/*
+1	Anil	33	Delhi	2923.90
+2	Suresh	43	NCR		3444.90
+3	Mahesh	22	Haryana	3456.90
+4	Mohan	65	UP		5433.90
+*/
+```
+![Alt text](image-125.png)![Alt text](image-126.png)
+```sql
+Select emp.emp_id,emp.emp_Name,ed.emp_age,ed.emp_address,ed.emp_salary
+from Employee2 emp
+      LEFT JOIN
+    EmployeeDetails ed
+ON(emp.emp_id = ed.emp_id);
+/*
+1	Anil	33	Delhi	2923.90
+2	Suresh	43	NCR		3444.90
+3	Mahesh	22	Haryana	3456.90
+4	Mohan	65	UP		5433.90
+5	Sohan  NULL  NULL	 NULL
+*/
+```
+![Alt text](image-127.png)![Alt text](image-128.png)
+```sql
+Select emp.emp_id,emp.emp_Name,ed.emp_age,ed.emp_address,ed.emp_salary
+from Employee2 emp
+      RIGHT JOIN
+    EmployeeDetails ed
+ON(emp.emp_id = ed.emp_id);
+/*
+1		Anil	33	Delhi	2923.90
+2		Suresh	43	NCR		3444.90
+3		Mahesh	22	Haryana	3456.90
+4		Mohan	65	UP		5433.90
+NULL	NULL	34	Delhi	4332.90
+NULL	NULL	32	Delhi	4554.90
+*/
+```
+![Alt text](image-129.png)![Alt text](image-130.png)
+```sql
+Select emp.emp_id,emp.emp_Name,ed.emp_age,ed.emp_address,ed.emp_salary
+from Employee2 emp
+      FULL JOIN
+    EmployeeDetails ed
+ON(emp.emp_id = ed.emp_id);
+/*
+1		Anil	33		Delhi	2923.90
+2		Suresh	43		NCR		3444.90
+3		Mahesh	22		Haryana	3456.90
+4		Mohan	65		UP		5433.90
+5		Sohan	NULL	NULL	NULL
+NULL	NULL	34		Delhi	4332.90
+NULL	NULL	32		Delhi	4554.90
+*/
+```
+![Alt text](image-131.png)![Alt text](image-132.png)
+#### aap cross join ko use karenge to aap relationship create nhi karenge.
+```sql
+Select emp.emp_id,emp.emp_Name,ed.emp_age,ed.emp_address,ed.emp_salary
+from Employee2 emp
+      CROSS JOIN
+    EmployeeDetails ed;
+/*
+1	Anil	33	Delhi	2923.90
+1	Anil	43	NCR		3444.90
+1	Anil	22	Haryana	3456.90
+1	Anil	65	UP		5433.90
+1	Anil	34	Delhi	4332.90
+1	Anil	32	Delhi	4554.90
+
+2	Suresh	33	Delhi	2923.90
+2	Suresh	43	NCR		3444.90
+2	Suresh	22	Haryana	3456.90
+2	Suresh	65	UP		5433.90
+2	Suresh	34	Delhi	4332.90
+2	Suresh	32	Delhi	4554.90
+
+3	Mahesh	33	Delhi	2923.90
+3	Mahesh	43	NCR		3444.90
+3	Mahesh	22	Haryana	3456.90
+3	Mahesh	65	UP		5433.90
+3	Mahesh	34	Delhi	4332.90
+3	Mahesh	32	Delhi	4554.90
+
+4	Mohan	33	Delhi	2923.90
+4	Mohan	43	NCR		3444.90
+4	Mohan	22	Haryana	3456.90
+4	Mohan	65	UP		5433.90
+4	Mohan	34	Delhi	4332.90
+4	Mohan	32	Delhi	4554.90
+
+5	Sohan	33	Delhi	2923.90
+5	Sohan	43	NCR		3444.90
+5	Sohan	22	Haryana	3456.90
+5	Sohan	65	UP		5433.90
+5	Sohan	34	Delhi	4332.90
+5	Sohan	32	Delhi	4554.90
+
+Observation:
+  Employee2 table has 5 row & EmployeeDetails has 6 row
+    so Cross jOin is 5*6 = 30 row
+
+*/
+```
+![Alt text](image-133.png)![Alt text](image-135.png)
+- 1 hi table ko ussi ke sath join karte hai, that's called Self join
+- aisa data table mein hota hia, jisme PK aur FK hoti hai and Ussi table ki FK internally PK ka refrence use karti hai.
+```sql
+Create table Company
+(
+	emp_id int,
+	emp_name varchar(100),
+	manager_id int,
+	city varchar(100)
+)
+
+Insert Into Company Values(1,'Anil',6,'Delhi');
+Insert Into Company Values(2,'Sunil',2,'Delhi');
+Insert Into Company Values(3,'Mahesh',4,'Delhi');
+Insert Into Company Values(4,'Suresh',3,'Delhi');
+Insert Into Company Values(5,'Amit',1,'Delhi');
+Insert Into Company Values(6,'Kumar',8,'Delhi');
+Insert Into Company Values(7,'Arun',7,'Delhi');
+Insert Into Company Values(8,'Rajesh',5,'Delhi');
+
+Select * from Company;
+/*
+1	Anil	6	Delhi
+2	Sunil	2	Delhi
+3	Mahesh	4	Delhi
+4	Suresh	3	Delhi
+5	Amit	1	Delhi
+6	Kumar	8	Delhi
+7	Arun	7	Delhi
+8	Rajesh	5	Delhi
+
+Emp id 1 Anil hai ye ek employee hai
+    uska manager id 6 hai wo bhi ek employee hi hai
+*/
+
+Select a.emp_id as EmpId,a.emp_name as EName,
+   b.emp_id as ManagerId,b.emp_name as ManagerName
+from Company a,Company b
+ where a.manager_id=b.emp_id;
+ /*
+ company mein hume empId,empName,ManagerId,ManagerName lena hai
+  hum set karenge
+  empId = a.empId
+  empName = a.empName
+  ManagerId= a ke mangerId mein b ki empId dalenge
+  ManagerName = a ke manager Name mein b ki empName dalenge
+
+  wher a and b both are refer to same table.
+
+1	Anil	6	Kumar
+2	Sunil	2	Sunil
+3	Mahesh	4	Suresh
+4	Suresh	3	Mahesh
+5	Amit	1	Anil
+6	Kumar	8	Rajesh
+7	Arun	7	Arun
+8	Rajesh	5	Amit
+ */
+```
+# 16. Derived Table in sql
+- Derived table aapki ek subquery hai jo ki from caluse ke andar nested hoti hai
+- ye ek technique hai jisme aap result set ko generate kar sakte memory ke andar
+- and wo temprary result ko aap outer query mein use kar sakte.
+- aap long query ko short kar sakte logical step se
+- derived query scope keval outer query tak hi limit hota hai
+- mane outer query ke baahar aap usse use nhi kar sakte.
+- badi complex query/processing ko aapko logical step me divide karna ho aur unka result as a table outer query ko pass karna ho tab hum derived table use karenge.
+
+![Alt text](image-134.png)![Alt text](image-136.png)
+```sql
+use MyDatabase;
+Create table educations
+(
+ education_id int,
+ education Varchar(100)
+)
+insert into educations(education_id,education) Values(1,'Bachelor');
+insert into educations(education_id,education) Values(2,'Masters');
+insert into educations(education_id,education) Values(3,'MS');
+insert into educations(education_id,education) Values(4,'M.Tech');
+insert into educations(education_id,education) Values(5,'MD');
+insert into educations(education_id,education) Values(6,'MBBS');
+insert into educations(education_id,education) Values(7,'Post Graduate');
+
+Create table depts
+(
+	Dept_id int,
+	Dept_name Varchar(100)
+)
+
+insert into depts(Dept_id,Dept_name) Values(1,'IT');
+insert into depts(Dept_id,Dept_name) Values(2,'HR');
+insert into depts(Dept_id,Dept_name) Values(3,'Sales');
+insert into depts(Dept_id,Dept_name) Values(4,'Account');
+insert into depts(Dept_id,Dept_name) Values(5,'Marketing');
+insert into depts(Dept_id,Dept_name) Values(6,'Data Processing');
+insert into depts(Dept_id,Dept_name) Values(7,'Hardware');
+insert into depts(Dept_id,Dept_name) Values(8,'Software Developement');
+
+Create table Cities
+(
+	City_Id int,
+	City_Name Varchar(100)
+)
+
+Insert into Cities(City_Id,City_Name) Values(1,'London');
+Insert into Cities(City_Id,City_Name) Values(2,'Washington');
+Insert into Cities(City_Id,City_Name) Values(3,'Bangor');
+Insert into Cities(City_Id,City_Name) Values(4,'Belfast');
+Insert into Cities(City_Id,City_Name) Values(5,'Birmingham');
+Insert into Cities(City_Id,City_Name) Values(6,'Bradford');
+Insert into Cities(City_Id,City_Name) Values(7,'Bristol');
+Insert into Cities(City_Id,City_Name) Values(8,'Cantebury');
+
+Create table Employee3
+(
+	empId int,
+	First_Name Varchar(100),
+	Last_Name Varchar(100),
+	Education_Id int,
+	Salary Int,
+	joinYear Int,
+	DeptId int,
+	City_Id int
+)
+
+Insert Into Employee3(empId,First_Name,Last_Name,Education_Id,Salary,joinYear,
+ DeptId,City_Id) Values(1001,'John','Yang',1,3000,2021,1,1);
+ Insert Into Employee3(empId,First_Name,Last_Name,Education_Id,Salary,joinYear,
+ DeptId,City_Id) Values(1002,'Smith','Ting',2,4000,2020,3,2);
+ Insert Into Employee3(empId,First_Name,Last_Name,Education_Id,Salary,joinYear,
+ DeptId,City_Id) Values(1003,'king','Amaze',4,6000,2019,2,4);
+ Insert Into Employee3(empId,First_Name,Last_Name,Education_Id,Salary,joinYear,
+ DeptId,City_Id) Values(1004,'Milia','King',7,5500,2021,5,8);
+ Insert Into Employee3(empId,First_Name,Last_Name,Education_Id,Salary,joinYear,
+ DeptId,City_Id) Values(1005,'Linda','Reina',4,5500,2022,5,6);
+ Insert Into Employee3(empId,First_Name,Last_Name,Education_Id,Salary,joinYear,
+ DeptId,City_Id) Values(1006,'Tony','Blele',2,5500,1990,3,4);
+ Insert Into Employee3(empId,First_Name,Last_Name,Education_Id,Salary,joinYear,
+ DeptId,City_Id) Values(1007,'Joshep','Desuja',5,7800,2020,4,8);
+ Insert Into Employee3(empId,First_Name,Last_Name,Education_Id,Salary,joinYear,
+ DeptId,City_Id) Values(1009,'Alice','Rocky',6,2100,2021,6,3);
+
+ Select * from educations;
+ /*
+ 1	Bachelor
+2	Masters
+3	MS
+4	M.Tech
+5	MD
+6	MBBS
+7	Post Graduate
+ */
+
+ Select * from depts;
+ /*
+ 1	IT
+2	HR
+3	Sales
+4	Account
+5	Marketing
+6	Data Processing
+7	Hardware
+8	Software Developement
+ */
+
+ Select * from Cities;
+ /*
+ 1	London
+2	Washington
+3	Bangor
+4	Belfast
+5	Birmingham
+6	Bradford
+7	Bristol
+8	Cantebury
+ */
+
+ Select * from Employee3;
+ /*
+ 1001	John	Yang	1	3000	2021	1	1
+1002	Smith	Ting	2	4000	2020	3	2
+1003	king	Amaze	4	6000	2019	2	4
+1004	Milia	King	7	5500	2021	5	8
+1005	Linda	Reina	4	5500	2022	5	6
+1006	Tony	Blele	2	5500	1990	3	4
+1007	Joshep	Desuja	5	7800	2020	4	8
+1009	Alice	Rocky	6	2100	2021	6	3
+ */
+```
+#### Education_id/Dept_Id/City_Id ye aapka foreign key hai
+```sql
+ --Hume employee ki full details show karni hai
+   -- including eucation Name,dept name and city Name
+
+--1. Select 
+ Select empId,First_Name,LAST_Name,Salary,joinYear,
+    edu.education,
+	dp.Dept_name,
+	city.City_Name
+ from Employee3 emp
+		INNER JOIN
+	  educations edu
+  ON(emp.Education_Id = edu.education_id)
+         INNER JOIN
+	   depts dp
+  ON(emp.DeptId = dp.Dept_id)
+         INNER JOIN
+	    Cities city
+  ON(emp.City_Id = city.City_Id);
+  /*
+empId  Fi_name L_Name  Sal     join   education      Dept_name        City_name
+1001	John	Yang	3000	2021	Bachelor		IT				London
+1002	Smith	Ting	4000	2020	Masters			Sales			Washington
+1003	king	Amaze	6000	2019	M.Tech			HR				Belfast
+1004	Milia	King	5500	2021	Post Graduate	Marketing		Cantebury
+1005	Linda	Reina	5500	2022	M.Tech			Marketing		Bradford
+1006	Tony	Blele	5500	1990	Masters			Sales			Belfast
+1007	Joshep	Desuja	7800	2020	MD				Account			Cantebury
+1009	Alice	Rocky	2100	2021	MBBS			Data Processing	Bangor
+
+Aapke ke pass multiple Join hai 
+  so Select ke through aaap combine kar sakte.
+  */
+
+-- 2 View
+ -- is complex part ko hide karne ke liye aap view create kar sakte 
+ 
+ Create View vwDemo
+ As 
+ Select empId,First_Name,LAST_Name,Salary,joinYear,
+    edu.education,
+	dp.Dept_name,
+	city.City_Name
+ from Employee3 emp
+		INNER JOIN
+	  educations edu
+  ON(emp.Education_Id = edu.education_id)
+         INNER JOIN
+	   depts dp
+  ON(emp.DeptId = dp.Dept_id)
+         INNER JOIN
+	    Cities city
+  ON(emp.City_Id = city.City_Id);
+  /*
+   jo query ka complex part hai wo hat javenga..
+    user se hide ho javenga
+
+	ab apse aap direct viewDemo chalaye
+  */
+
+  Select * from vwDemo;
+  /*
+  1001	John	Yang	3000	2021	Bachelor		IT				London
+1002	Smith	Ting	4000	2020	Masters			Sales			Washington
+1003	king	Amaze	6000	2019	M.Tech			HR				Belfast
+1004	Milia	King	5500	2021	Post Graduate	Marketing		Cantebury
+1005	Linda	Reina	5500	2022	M.Tech			Marketing		Bradford
+1006	Tony	Blele	5500	1990	Masters			Sales			Belfast
+1007	Joshep	Desuja	7800	2020	MD				Account			Cantebury
+1009	Alice	Rocky	2100	2021	MBBS			Data Processing	Bangor
+
+View ka kamm hai complex part ko hide karna
+  */
+
+ /*3. Derived table
+    DT aapka ek temprary result set hota hai 
+	  yane ki nested query
+	aur outer query mein iska result as a table ke form mein 
+	  return hota hai
+
+	  outer query(inner query i.e nested query)
+
+	  niche ke nested/inner query ek table return karenge
+	    uska name honga derived table
+ */ 
+
+Select * from 
+(
+  Select empId,First_Name,LAST_Name,Salary,joinYear,
+		 edu.education,
+		dp.Dept_name,
+		city.City_Name
+	from Employee3 emp
+			INNER JOIN
+		  educations edu
+	 ON(emp.Education_Id = edu.education_id)
+		  INNER JOIN
+		 depts dp
+	 ON(emp.DeptId = dp.Dept_id)
+			 INNER JOIN
+		 Cities city
+	 ON(emp.City_Id = city.City_Id)
+
+) As DerivedTable;
+/*
+1001	John	Yang	3000	2021	Bachelor		IT				London
+1002	Smith	Ting	4000	2020	Masters			Sales			Washington
+1003	king	Amaze	6000	2019	M.Tech			HR				Belfast
+1004	Milia	King	5500	2021	Post Graduate	Marketing		Cantebury
+1005	Linda	Reina	5500	2022	M.Tech			Marketing		Bradford
+1006	Tony	Blele	5500	1990	Masters			Sales			Belfast
+1007	Joshep	Desuja	7800	2020	MD				Account			Cantebury
+1009	Alice	Rocky	2100	2021	MBBS			Data Processing	Bangor
+*/
+
+-- aap is outer query i.e derived table mein
+  -- aap condition laga sakte
+  -- hume id 1002 ka hi data dekhna hai pura
+Select * from 
+(
+  Select empId,First_Name,LAST_Name,Salary,joinYear,
+		 edu.education,
+		dp.Dept_name,
+		city.City_Name
+	from Employee3 emp
+			INNER JOIN
+		  educations edu
+	 ON(emp.Education_Id = edu.education_id)
+		  INNER JOIN
+		 depts dp
+	 ON(emp.DeptId = dp.Dept_id)
+			 INNER JOIN
+		 Cities city
+	 ON(emp.City_Id = city.City_Id)
+
+) As DerivedTable where empId = 1002;
+  
+-- 1002	Smith	Ting	4000	2020	Masters	Sales	Washington
+
+--Hume wo data dekhna hai jisme dept_id =2 ho
+Select * from 
+(
+  Select empId,First_Name,LAST_Name,Salary,joinYear,
+		 edu.education,
+		dp.Dept_name,
+		city.City_Name
+	from Employee3 emp
+			INNER JOIN
+		  educations edu
+	 ON(emp.Education_Id = edu.education_id)
+		  INNER JOIN
+		 depts dp
+	 ON(emp.DeptId = dp.Dept_id)
+			 INNER JOIN
+		 Cities city
+	 ON(emp.City_Id = city.City_Id)
+
+) As DerivedTable where dept_Id =2;
+-- Error
+--Invalid column name 'dept_Id'.
+-- kyuki dept_id table mein nhi to dalo bhai
+Select * from 
+(
+  Select empId,First_Name,LAST_Name,Salary,joinYear,
+		 edu.education,
+		dp.Dept_name,dp.dept_id,
+		city.City_Name
+	from Employee3 emp
+			INNER JOIN
+		  educations edu
+	 ON(emp.Education_Id = edu.education_id)
+		  INNER JOIN
+		 depts dp
+	 ON(emp.DeptId = dp.Dept_id)
+			 INNER JOIN
+		 Cities city
+	 ON(emp.City_Id = city.City_Id)
+
+) As DerivedTable where dept_Id =2;
+-- 1003	king	Amaze	6000	2019	M.Tech	HR	2	Belfast
+```
+# 17. Data/Entity/Domain/Referntial Integrity in dbms
+
+
+
+
+
+
+
+
+
+
 
