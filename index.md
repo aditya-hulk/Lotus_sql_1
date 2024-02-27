@@ -16,3 +16,6 @@
 ### 15. Sql Joins
 ### 16. Derived Table in sql
 ### 17. Data/Entity/Domain/Referntial Integrity in dbms
+### 18. Sql Set Operator
+### 19. Sql Indexes 
+### 20. Group By or having clause

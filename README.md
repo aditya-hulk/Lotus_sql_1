@@ -3930,6 +3930,755 @@ Select * from
 -- 1003	king	Amaze	6000	2019	M.Tech	HR	2	Belfast
 ```
 # 17. Data/Entity/Domain/Referntial Integrity in dbms
+- Jab aap data enter karte hai tab aapko kuch rules banane padte hai, jisse aapka data validate hoke db mein enter ho.
+- apko ek column ya combination of col mein uniqueness rakhna hai tab aapko kuch set of rules follow karne honge.
+- db mein data enter karne se pehle aapko usko validate/pure karna hai, iske liye aap kuch rules banate ho isse business rules bhi kahte.
+- kuch business rules db provide karta, kuch custom rule aap banate ho.
+
+![Alt text](image-137.png)![Alt text](image-138.png)
+```sql
+use MyDatabase;
+/*
+   Sytem Defined Data Integrity:
+   Entity Integrity :
+        It ensures that each row in a table is uniquely identificable entity.
+
+NOT NULL : Ensures that a column cannot have null value.
+ UNIQUE KEY : All the value in the column must be unique.
+PRIMARY KEY:A primary key is the feild which uniquely identify each row in a table.
+
+Inka purpose hai ki data ko proper format mein maintain karna
+*/
+
+Create table EntityIntegrityDemo
+(
+	ID Int,
+	Dept Varchar(50)
+)
+
+Insert Into EntityIntegrityDemo(ID) Values(1);
+Insert Into EntityIntegrityDemo(ID) Values(2);
+
+Select * from EntityIntegrityDemo;
+/*
+1	NULL
+2	NULL
+*/
+
+--Hume nhi chahte ki Dept col mein null value enter ho
+Drop table EntityIntegrityDemo;
+
+--NOT NULL
+Create table EntityIntegrityDemo
+(
+	ID Int,
+	Dept Varchar(50) NOT NULL
+)
+
+Insert Into EntityIntegrityDemo(ID) Values(1);
+/*
+Cannot insert the value NULL into column 'Dept', table 'MyDatabase.dbo.EntityIntegrityDemo';
+column does not allow nulls. INSERT fails.
+
+Isse kehte hai Data Integrity, 
+    Usen indicate kara diya ki yaha aap null data nhi de sakte.
+
+*/
+--Unique key
+Insert Into EntityIntegrityDemo(ID,Dept) Values(1,'Sales');
+Insert Into EntityIntegrityDemo(ID,Dept) Values(1,'IT');
+
+Select * from EntityIntegrityDemo;
+/*
+1	Sales
+1	IT
+
+Id same hai aur Dept differnt, logically not proper\
+  aap chahte hai ki har dept mein id unique rahe
+*/
+Drop table EntityIntegrityDemo;
+
+Create table EntityIntegrityDemo
+(
+	ID Int UNIQUE,
+	Dept Varchar(50) NOT NULL
+)
+
+Insert Into EntityIntegrityDemo(ID,Dept) Values(1,'Sales');
+-- 1 row affected)
+Insert Into EntityIntegrityDemo(ID,Dept) Values(1,'IT');
+/*
+Violation of UNIQUE KEY constraint 'UQ__EntityIn__3214EC26F78A5CD7'. 
+Cannot insert duplicate key in object 'dbo.EntityIntegrityDemo'. 
+The duplicate key value is (1).
+
+Yaha business rule apply ho gya
+  ki Id aapko unique deni hai 
+     nhi to db ye data store nhi karenga.
+*/
+-- Primary key
+/*
+ Primary key or Unique key dono ka purpose ek hi hai col mei unique value 
+   maintain karna
+Diff -
+  1) Primary key 1 for table   1) Unique key Multiple
+  2) Null value not accept     2) Accept 1 null value
+  3) Clustered Index created   3) Non clustered Index create hota hai
+*/
+Drop table EntityIntegrityDemo;
+
+Create table EntityIntegrityDemo
+(
+	ID Int Primary key,
+	MobileNo Varchar(15) Unique,
+	Dept Varchar(50) NOT NULL
+)
+
+Insert Into EntityIntegrityDemo(ID,MobileNo,Dept) Values(1,'2111','Sales');
+-- 1 row affected
+
+-- aap Unique key mein 1 null value accept kar sakte
+Insert Into EntityIntegrityDemo(ID,Dept) Values(2,'IT');
+
+Select * from EntityIntegrityDemo;
+/*
+ID  MNo     Dept
+1	2111	Sales
+2	NULL	IT
+
+1 null allow kiya  Mobile Number col ne jo ki unique hai
+*/
+-- abhi yadi phir se null insert kiya mobile number mein
+Insert Into EntityIntegrityDemo(ID,Dept) Values(3,'IT');
+/*
+Violation of UNIQUE KEY constraint 'UQ__EntityIn__D6D73A86135DA48A'. 
+Cannot insert duplicate key in object 'dbo.EntityIntegrityDemo'. 
+The duplicate key value is (<NULL>).
+*/
+```
+![Alt text](image-139.png)
+```sql
+/*
+  System Defined Data Integrity 
+  2) Domain Integrity : It ensures that the values for data in a db must follow defined 
+      rules for it's range, format and specific values.
+	
+Check : This constraints help to validate the values of the col to meet  a particular 
+   condition.
+
+Default : This constrain specify the default value for the col when no value is 
+   specified by the user.
+*/
+--Check Constraint & Default constraint : 
+Drop table EntityIntegrityDemo;
+
+--Hum chahte hai ki employee ki age < 40 ho
+-- Dept yadi user ne specify nahi kiya to Default value uski DF ho
+  -- DF ==>Default Dep
+Create table EntityIntegrityDemo
+(
+	ID Int Primary key,
+	Age Int Check(Age < 40),
+	Dept Varchar(50) NOT NULL Default 'DF'
+)
+
+-- age 40 ya usse badi hai
+Insert Into EntityIntegrityDemo(ID,Age,Dept) Values(1,40,'Sales');
+/*
+The INSERT statement conflicted with the CHECK constraint "CK__EntityInteg__Age__55F4C372".
+The conflict occurred in database "MyDatabase", table "dbo.EntityIntegrityDemo", 
+column 'Age'.
+*/
+-- ab yadi proper age deke yadi hum Dept skip kare tab
+Insert Into EntityIntegrityDemo(ID,Age) Values(1,34);
+
+-- Yaha apne dept ke value specify kari hai
+  -- tab wo default value ko skip karenga.
+Insert Into EntityIntegrityDemo(ID,Age,Dept) Values(2,35,'Sales');
+
+Select * from EntityIntegrityDemo;
+/*
+1	34	DF
+2	35	Sales
+*/
+```
+### Foreign key
+```sql
+/*
+Sytem Defined Data Integrity:
+3)Refrential Integrity:
+  Foreign key: It is used to create the relationship between the db table.
+
+  In order to create relationship between multiple tables, 
+    we must specify FK in a table 
+	 that references to column in another table
+	  which is a primary key column.
+
+	For Binding with each other
+	 - we require two tables (atleast)
+	 - That two tables have common column name
+	 - Those column should be of same data type.
+
+	Terminology:
+	 Parent Table / Master table :
+	    In a relationship, the table which contain  a primary key is called 
+		 Parent/Master table.
+
+	   Child/Details table:
+	     In a relationship, the table which contain  a foreign key is called 
+		  Child/Details table.
+*/
+
+ -- Customer table mein customer ka specific data rakhna hai.
+ Create Table Customer
+ (
+	Customer_Id Int Primary Key,
+	MobileNumber Varchar(15) Not Null,
+	City Varchar(50) Not Null
+ )
+
+ --Hume Ek relationship create karna hai. 
+ -- Ek Particualar customer ne kitne order kiye, 
+  -- kab kab kiye.. sari Customer Details hona 
+  -- so that hum report generate kar sake.
+ Create Table Customer_Order
+ (
+	Order_Id Int Primary key,
+	Customer_Id Int,
+	Order_Date Date,
+	Price Int,
+	FOREIGN KEY(Customer_Id) REFERENCES Customer(Customer_Id)
+ )
+```
+![Alt text](image-140.png)
+- Relationship : ***1:Many*** mane ==> Yadi Child Table(i.e Customer order) mien aapko kisi customer se related yadi entry karni hai
+to Parent table(i.e Customer table) mein uska  Id exist hona chiaye .
+- Otherwise Child table (Customer orders) mein aap Data eneter nhi kar paonge.
+- ***2ri baat*** Yaha Primary Key wala column name aur Foreign key wala column name same na bhi ho to chalta but data type same hona chiaye.
+- column name matter nahi karta, datatype matter karta
+
+![Alt text](image-141.png)
+#### Impact on Parent table via Insert Operation
+- Yadi aap Parent table(Customer) mein data insert karte ho
+- to uska child table(Cust_Ord) par koyi impact nhi aavenga.
+#### Impact on Child table via Insert Operation
+- Yadi Child table mein aap data insert karte ho, to wo check karenga 
+- ki customer_id Parent table mein exist karti hai
+- agar haa to data insert
+- if no so not insert
+```sql
+-- Insert data into Child table
+ -- Insert data into Child table
+ Insert Into Customer_Order(Order_Id,Customer_Id,Order_Date,Price) 
+ Values(1,1,'2020-09-09',700);
+ /*
+ The INSERT statement conflicted with the FOREIGN KEY constraint 
+ "FK__Customer___Custo__5BAD9CC8". The conflict occurred in database 
+ "MyDatabase", table "dbo.Customer", column 'Customer_Id'.
+
+ Abhi Parent table i.e Customer mein Cust_id i.e PK = 1 exist nhi karti 
+ to  child table id=1 ke liye data insert nhi kar payenga.
+ */
+ 
+ --Data insert kare Parent table mein with id=1
+ Insert Into Customer(Customer_Id,MobileNumber,City)
+  Values(1,'34345','London');
+-- 1 row affected
+
+-- ab data insert karo child table mein
+ Insert Into Customer_Order(Order_Id,Customer_Id,Order_Date,Price) 
+ Values(1,1,'2020-09-09',700);
+ -- 1 row affected
+
+ Select * from Customer;
+ -- 1	34345	London
+
+ Select * from Customer_Order;
+ --1	1	2020-09-09	700
+
+ --Some more entry
+  Insert Into Customer(Customer_Id,MobileNumber,City)
+  Values(2,'44345','Dhaka');
+   Insert Into Customer(Customer_Id,MobileNumber,City)
+  Values(3,'54345','Paris');
+   Insert Into Customer(Customer_Id,MobileNumber,City)
+  Values(4,'64345','Delhi');
+
+  Select * from Customer;
+  /*
+1	34345	London
+2	44345	Dhaka
+3	54345	Paris
+4	64345	Delhi
+  */
+
+  Select * from Customer_Order;
+  --1	1	2020-09-09	700
+
+  -- Ab yadi mein aisi id Child table mein insert karu jo Parent mein exist nhi karti
+   Insert Into Customer_Order(Order_Id,Customer_Id,Order_Date,Price) 
+ Values(1,5,'2020-09-09',700);
+ /*
+ Violation of PRIMARY KEY constraint 'PK__Customer__F1E4607BBA172C48'. 
+ Cannot insert duplicate key in object 'dbo.Customer_Order'. 
+ The duplicate key value is (1).
+ */
+
+  Insert Into Customer_Order(Order_Id,Customer_Id,Order_Date,Price) 
+ Values(2,4,'2020-09-09',700);
+ -- 1 row affected
+
+ -- ye bhi valid hai
+  -- in child table duplicate fk is allowed
+   -- but require only 1 PK
+ Insert Into Customer_Order(Order_Id,Customer_Id,Order_Date,Price) 
+ Values(3,4,'2020-09-09',700);
+
+ Select * from Customer;
+/*
+1	34345	London
+2	44345	Dhaka
+3	54345	Paris
+4	64345	Delhi
+*/
+
+ Select * from Customer_Order;
+ /*
+1	1	2020-09-09	700
+2	4	2020-09-09	700
+3	4	2020-09-09	700
+ */
+```
+
+![Alt text](image-142.png)
+#### Impact on Parent table for Update operation
+- Yadi aapka cust_id(PK) iska reference Child table ki cust_id(FK) mein hai, to aap update nhi kar sakte.
+- And vice versa.
+#### Impact on Child table for Update operation
+- Yadi Child table mein aap FK ko update karna chahte ho
+ - eg cust_id(FK) = 1 ko aap 6 karna chahte ho
+ - so wo check karenga Parent table men ye 6 cust_Id exist karti hai 
+ - agar ha toh update
+ - warna nhi
+```sql
+ Select * from Customer;
+/*
+1	34345	London
+2	44345	Dhaka
+3	54345	Paris
+4	64345	Delhi
+*/
+
+ Select * from Customer_Order;
+ /*
+1	1	2020-09-09	700
+2	4	2020-09-09	700
+3	4	2020-09-09	700
+ */
+  --Update
+ -- Hume Parent table ki PK update karenge 1 to 6 jo refer kar raha hai 
+ -- already child table mein
+ Update Customer set Customer_Id = 6 where Customer_Id = 1;
+ /*
+ The UPDATE statement conflicted with the REFERENCE constraint "FK__Customer___Custo__5BAD9CC8". 
+ The conflict occurred in database "MyDatabase", table "dbo.Customer_Order", column 'Customer_Id'.
+
+ */
+
+ --Hum aise PK id ko update kare jiska ref i.e FK child table mein na ho
+  Update Customer set Customer_Id = 6 where Customer_Id = 3;
+  -- 1 row affected
+
+Select * from Customer;
+/*
+1	34345	London
+2	44345	Dhaka
+4	64345	Delhi
+6	54345	Paris
+*/
+
+Select * from Customer_Order;
+/*
+1	1	2020-09-09	700
+2	4	2020-09-09	700
+3	4	2020-09-09	700
+*/
+ 
+ -- child table UPdate
+ -- hum child table mein FK update karte hai 4 to 8 
+ -- but 8 PK exist nhi karta
+ Update Customer_Order Set Customer_Id=8 where Customer_Id=4;
+ /*
+ The UPDATE statement conflicted with the FOREIGN KEY constraint "FK__Customer___Custo__5BAD9CC8".
+ The conflict occurred in database "MyDatabase", table "dbo.Customer", column 'Customer_Id'.
+ */
+
+  Update Customer_Order Set Customer_Id=2 where Customer_Id=4;
+  -- 2 row affected
+
+  Select * from Customer_Order;
+/*
+1	1	2020-09-09	700
+2	2	2020-09-09	700
+3	2	2020-09-09	700
+*/
+```
+ ![Alt text](image-143.png)
+ #### Impact on Parent table for delete operation
+ - Yadi aap Parent table ki PK ie. Cust_id delte karne jaa rahe ho
+ - so wo check karenga ki child table iski FK(relationship) present hai kya
+ - yadi haa to delete nhi karne denga
+ - if naa to delete 
+#### Impact on Child table for delete operation
+- Aap child table mein koyi bhi data delete kar sakte, kauno dikkat nhi
+```sql
+Select * from Customer;
+/*
+1	34345	London
+2	44345	Dhaka
+4	64345	Delhi
+6	54345	Paris
+*/
+Select * from Customer_Order;
+/*
+1	1	2020-09-09	700
+2	2	2020-09-09	700
+3	2	2020-09-09	700
+*/
+
+-- Hum PK=1 ko delete karte, iski FK present hai
+Delete Customer where Customer_Id=1;
+/*
+The DELETE statement conflicted with the REFERENCE constraint "FK__Customer___Custo__5BAD9CC8".
+The conflict occurred in database "MyDatabase", table "dbo.Customer_Order", column 'Customer_Id'.
+*/
+
+-- Hum PK=6 ko delete karte, iski FK present nhi hai
+Delete Customer where Customer_Id=6;
+-- 1 row affeceted
+
+Select * from Customer;
+/*
+1	34345	London
+2	44345	Dhaka
+4	64345	Delhi
+*/
+
+Select * from Customer_Order;
+/*
+1	1	2020-09-09	700
+2	2	2020-09-09	700
+3	2	2020-09-09	700
+*/
+
+-- aap child table se koyi bhi data delete kar sakte
+Delete Customer_Order where Customer_Id=1;
+-- 1 row affected
+Select * from Customer_Order;
+--2		2	2020-09-09	700
+--3		2	2020-09-09	700
+```
+### Custom Rule for Data Integrity / User Defined Data integrity
+```sql
+/*
+User Defined Data Integrity /
+Custom Rule for Data Integrity
+
+ Triggers:
+  A Trigger is a special kind of a stored procedure or stored program  i.e 
+  automatically fired or executed when some event occur.
+
+  event - Create / alter / update / insert / delete
+*/
+Select * from Employee;
+/*
+1005	Linda	IT		3200	NULL	2022
+1006	Tony	HR		6700	Delhi	1990
+1007	Joshef	Account	7800	Delhi	2020
+1009	Alice	Sales	2100	London	2021
+1009	Mangu	IT		2200	NULL	2022
+1010	David	HR		1100	Dhaka	2022
+1011	Taylor	Dev		78966	NewYork	2022
+1012	Mikea	Dev		7654	DC		2019
+1013	Susan	Welfare	7538	London	2022
+1014	Mac_Son	IT		6886	Kabul	2018
+1015	Mac_Gill IT		6789	Kabul	2012
+
+Creatr trigger trriggerName on tableName
+after eventName 
+
+-- Jab bhi employee table se delete honga ye trigger fire honga
+*/
+
+CREATE Trigger trgCheckDelete on Employee
+	After Delete 
+	As 
+Begin
+	declare @empid int;
+	Select @empid=i.EmpId from deleted i;
+	if(@empid > 1011)
+		Begin
+		Print 'U are not authorized to delete it';
+		ROLLBACK TRANSACTION;
+		End
+End
+
+Delete from Employee where empId = 1012;
+--U are not authorized to delete it
+
+Delete from Employee where empId = 1010;
+-- 1 row affected
+
+Select * from Employee;
+/*
+1005	Linda		IT			3200	NULL	2022
+1006	Tony		HR			6700	Delhi	1990
+1007	Joshef		Account		7800	Delhi	2020
+1009	Alice		Sales		2100	London	2021
+1009	Mangu		IT			2200	NULL	2022
+1011	Taylor		Dev			78966	NewYork	2022
+1012	Mikea		Dev			7654	DC		2019
+1013	Susan		Welfare		7538	London	2022
+1014	Mac_Son		IT			6886	Kabul	2018
+1015	Mac_Gill	IT			6789	Kabul	2012
+
+1010 gayab hai...
+U can drop trigger
+Drop trigger triggername
+*/
+```
+# 18. Sql Set Operator
+- Sql Set operator, 2 query ke result set ko combine karta hai
+- It's like join operator but there is diff.
+- Set operator resultSet ko join karte hai
+- Join operator ye table ko join karte hai ek col ke base mein.
+
+![Alt text](image-144.png)
+### Rules
+- 2 query ko join karenge, to no of column same hone chaiye.
+- uska datatype same hona chaiye.
+- order by clause ye aapka 2nd query ka last statement hona cahiye
+- column ke order mayne karte.
+
+![Alt text](image-145.png)![Alt text](image-146.png)![Alt text](image-147.png)
+```sql
+use MyDatabase;
+
+/*
+Union Operator
+ It is used to combine result set of 2 or more select Statement.
+ It removes the duplicate rows between the various select statement.
+*/
+
+Create table User_1_Survey
+(
+	name Varchar(100),
+	MobileNo Varchar(100),
+	City Varchar(100),
+	Occupation Varchar(100),
+	Salary Int
+)
+
+Create table User_2_Survey
+(
+	Cust_Name Varchar(100),
+	Cust_MobileNo Varchar(100),
+	City Varchar(100),
+	Occupation Varchar(100),
+	Salary Int
+)
+
+Insert Into User_1_Survey(name,MobileNo,City,Occupation,Salary) 
+   Values('John','121212','Noida','Business',2000);
+Insert Into User_1_Survey(name,MobileNo,City,Occupation,Salary) 
+   Values('King_Duplicate','121213','Delhi','Self Emp',5000);
+Insert Into User_1_Survey(name,MobileNo,City,Occupation,Salary) 
+   Values('Lee-Duplicate','121214','London','Contractor',6000);
+Insert Into User_1_Survey(name,MobileNo,City,Occupation,Salary) 
+   Values('Suzan','121215','Braha','Service',5000);
+Insert Into User_1_Survey(name,MobileNo,City,Occupation,Salary) 
+   Values('Mike-Duplicate','121216','kurd','Business',4000);
+
+Insert Into User_2_Survey(Cust_Name,Cust_MobileNo,City,Occupation,Salary)
+   Values('Mike John','666666','London','Business',2000);
+Insert Into User_2_Survey(Cust_Name,Cust_MobileNo,City,Occupation,Salary)
+   Values('King_Duplicate','121213','Delhi','Self Emp',5000);
+Insert Into User_2_Survey(Cust_Name,Cust_MobileNo,City,Occupation,Salary)
+   Values('Lee-Duplicate','121214','London','Contractor',6000);
+Insert Into User_2_Survey(Cust_Name,Cust_MobileNo,City,Occupation,Salary)
+   Values('Korner','888888','Braha','Service',5000);
+ Insert Into User_2_Survey(Cust_Name,Cust_MobileNo,City,Occupation,Salary)
+    Values('Mike-Duplicate','121216','kurd','Business',4000);
+
+Select * from User_1_Survey;
+/*
+Name	       mob no
+John			121212	Noida	Business	2000
+King_Duplicate	121213	Delhi	Self Emp	5000
+Lee-Duplicate	121214	London	Contractor	6000
+Suzan			121215	Braha	Service		5000
+Mike-Duplicate	121216	kurd	Business	4000
+*/
+Select * from User_2_Survey;
+/*
+Cust_name      Cust-mo
+Mike John		666666	London	Business	2000
+King_Duplicate	121213	Delhi	Self Emp	5000
+Lee-Duplicate	121214	London	Contractor	6000
+Korner			888888	Braha	Service		5000
+Mike-Duplicate	121216	kurd	Business	4000
+
+Yaha col name diff hai - Cust_name and Cust_mobNo
+*/
+/*
+Union :
+   dono result set ko combine karenga
+    aur jo duplicate hai usse nikal denga
+
+aapko Union Operator lagane ke liye sare column specify karene honge
+  with proper order
+*/
+--RULE :1) no of col must be same
+Select name,MobileNo,City,Occupation from User_1_Survey
+UNION 
+Select Cust_Name,Cust_MobileNo,City,Occupation,Salary from User_2_Survey
+/*
+All queries combined using a UNION, INTERSECT or EXCEPT operator must have an equal number 
+of expressions in their target lists.
+*/
+
+--RULE :2) In case of mapping datatype must be same
+Select Salary,name,MobileNo,City,Occupation from User_1_Survey
+UNION 
+Select Cust_Name,Cust_MobileNo,City,Occupation,Salary from User_2_Survey
+--Conversion failed when converting the varchar value 'Business' to data type int.
+-- Salary hai int type and Cust_name hai varchar.. karke issue aaya
+
+Select name,MobileNo,City,Occupation,Salary from User_1_Survey
+UNION 
+Select Cust_Name,Cust_MobileNo,City,Occupation,Salary from User_2_Survey
+/*
+name            MobileNo 
+John			121212	Noida	Business	2000
+King_Duplicate	121213	Delhi	Self Emp	5000
+Korner			888888	Braha	Service		5000
+Lee-Duplicate	121214	London	Contractor	6000
+Mike John		666666	London	Business	2000
+Mike-Duplicate	121216	kurd	Business	4000
+Suzan			121215	Braha	Service		5000
+
+Duplicate hat gye hai 
+  aur aapko single result display ho gya.
+*/
+
+/*
+ Union All - mein sabhi record ko include kar deta hai
+*/
+Select name,MobileNo,City,Occupation,Salary from User_1_Survey
+UNION ALL
+Select Cust_Name,Cust_MobileNo,City,Occupation,Salary from User_2_Survey
+/*
+John			121212	Noida	Business	2000
+King_Duplicate	121213	Delhi	Self Emp	5000
+Lee-Duplicate	121214	London	Contractor	6000
+Suzan			121215	Braha	Service		5000
+Mike-Duplicate	121216	kurd	Business	4000
+Mike John		666666	London	Business	2000
+King_Duplicate	121213	Delhi	Self Emp	5000
+Lee-Duplicate	121214	London	Contractor	6000
+Korner			888888	Braha	Service		5000
+Mike-Duplicate	121216	kurd	Business	4000
+*/
+
+/*
+Intersect Operator
+  Takes the data from both result sets whcih are in common.
+*/
+Select name,MobileNo,City,Occupation,Salary from User_1_Survey
+Intersect
+Select Cust_Name,Cust_MobileNo,City,Occupation,Salary from User_2_Survey
+/*
+King_Duplicate	121213	Delhi	Self Emp	5000
+Lee-Duplicate	121214	London	Contractor	6000
+Mike-Duplicate	121216	kurd	Business	4000
+*/
+
+/*
+Except operator:
+  Takes the data from 1st result set but not the 2nd(i.e No matching to each other)
+
+  1st result set se data leta hai 
+    aur usse compare karta hai 2nd result set hai
+yadi koyi duplicate mila 
+   to remove it.
+*/
+Select name,MobileNo,City,Occupation,Salary from User_1_Survey
+EXCEPT
+Select Cust_Name,Cust_MobileNo,City,Occupation,Salary from User_2_Survey
+/*
+John	121212	Noida	Business	2000
+Suzan	121215	Braha	Service		5000
+*/
+```
+# 19. Sql Indexes 
+- Indexing ke wajah se aapka data reteive karne ka time bahut kam ho jata hai.
+- Data retreival time kam ho jave.
+- so that data aap fastly access kar pave.
+- index ye table aur view par create hota hai.
+- Aapka data bahut huge ho aur retrieval time bahut jyada tab indexing lagave.
+
+![Alt text](image-148.png)![Alt text](image-149.png)
+### Indexing se hamara data access time reduce ho javnega.
+### Types of Index
+#### 1.)Clustered indexing
+- Jab bhi aap PK generate karte particular col par, tab aapka clusterd index generate ho jata us col par.
+- aap isko manually bhi create kar sakte.
+- 1  table mein 1 hi clustered index ho sakta hai, since PK 1 hi hoti hai.
+- Clustred index jab bhi create karte tab, Ye us table ki sari row ko ek paritcular order mein arrange/sort kar deta.
+- Ye apna seraching karta uses B-Tree binary tree.
+#### 2.)C Non clusterd indexing
+- ye multiple ho sakte
+- Non cluster index data ko sort nhi karta.
+- ye book ke piche wale refrence jaisa hota hai.
+- ye apke leaf node ko use karta hai cluster index ki.
+#### 3.)CUnique indexing
+![Alt text](image-150.png)![Alt text](image-151.png)![Alt text](image-152.png)![Alt text](image-153.png)![Alt text](image-154.png)![Alt text](image-155.png)![Alt text](image-156.png)![Alt text](image-157.png)![Alt text](image-158.png)![Alt text](image-159.png)![Alt text](image-160.png)
+```sql
+use MyDatabase;
+
+--Indexing ka pattern dekhte
+
+--Employee table mein mere pass kitna data hai.
+Select count(*) from  Employee;
+-- 10 
+
+Select * from Employee;
+
+--last employee id nikalne ke liye ye query 
+Select top 1 * from Employee order by empId desc;
+--1015	Mac_Gill	IT	6789	Kabul	2012
+
+Create clustered index emp_idx
+ on Employee(empId ASC)
+-- emp_idx ye clusterd index create ho gya.
+
+--index create hone ke baad same id ko seach kare
+Select * from Employee where empid = 1015;
+--1015	Mac_Gill	IT	6789	Kabul	2012
+```
+### Non clusterd index search
+- ye data ko sort nhi karta
+- data ek jagh rakhta aur index dusri jagha
+
+![Alt text](image-161.png)![Alt text](image-162.png)![Alt text](image-163.png)![Alt text](image-164.png)
+
+- unnecssary indexing apke liye performance isseu ban sakta hai.
+- cluster index mein data hamara sorted order mein hota hai,
+- aapne data updata ya delete kiya
+- to sql server data ko rearrange karenga..
+# 20. Group By or having clause
+
+
 
 
 
