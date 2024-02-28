@@ -4926,8 +4926,378 @@ having ke andar
 */
 ```
 # 21. Sql sub query
+- Jab aap query likhte hai usko main query or outer query kehte hai.
+- us query ke andar jo qury likhte hai thats called subquery/nested query/child query.
+
+![Alt text](image-173.png)![Alt text](image-174.png)![Alt text](image-175.png)![Alt text](image-176.png) ![Alt text](image-177.png)
+```sql
+use MyDatabase;
+
+Create table Student
+(
+	RollNo Int,
+	student_Name Varchar(100),
+	city Varchar(100)
+)
+
+Insert Into Student Values(1,'Anil','Delhi');
+Insert Into Student Values(2,'Sunil','Delhi');
+Insert Into Student Values(3,'Ajay','NCR');
+Insert Into Student Values(4,'Vijay','Pune');
+Insert Into Student Values(5,'Manoj','Faridabad');
+Insert Into Student Values(6,'Geeta','Noida');
+Insert Into Student Values(7,'Sita','Noida');
+Insert Into Student Values(8,'Reeta','New Delhi');
+Insert Into Student Values(9,'Arvind','Faridabad');
+Insert Into Student Values(10,'Kumar','Delhi');
 
 
+Select * from Student;
+/*
+1	Anil	Delhi
+2	Sunil	Delhi
+3	Ajay	NCR
+4	Vijay	Pune
+5	Manoj	Faridabad
+6	Geeta	Noida
+7	Sita	Noida
+8	Reeta	New Delhi
+9	Arvind	Faridabad
+10	Kumar	Delhi
+*/
+Select * from Student_Marks;
+/*
+1	34	78	54
+2	78	43	87
+3	45	32	78
+4	36	78	32
+5	12	22	67
+6	21	65	43
+7	34	78	54
+8	89	78	54
+9	76	78	54
+10	22	56	54
+*/
+
+/*
+Single Row Subquery:
+ Find the marks of Student whose name is Anil and lives in Delhi.
+
+Analysis:
+    -marks ki info aapke Student_Marks table mein hai
+	-aur name aur City ki info Sudent table mein
+	-so use subquery
+	-Jab bhi Single Result aap subquery se expect karte hai 
+	    aap use karte hai  = operator
+	-Yadi aapne = operator use kiya hai, tab subquery must return single row
+	    otherwise error.
+*/
+	Select * from Student_Marks where RollNo =
+	(Select RollNo from Student where student_Name='Anil' and city='Delhi');
+--1	34	78	54
+
+--Yadi subquery multiple row return kare to error.
+	Select * from Student_Marks where RollNo =
+	(Select RollNo from Student where  city='Delhi');
+
+	Select * from Student_Marks where RollNo >=
+	(Select RollNo from Student where  city='Delhi');
+/*
+Subquery returned more than 1 value. This is not permitted when the subquery follows
+=, !=, <, <= , >, >= or when the subquery is used as an expression.
+
+=, !=, <, <= , >, >=  ye sare operator single query fetch karte hai
+multiple aaye tab error show karenga
+*/
+```
+### Subquery Multiple row 
+- mulitple row return accept karne ke liye use IN operator instead of = operator.
+```sql
+-- How to find marks of Student who live in Noida city
+
+Select * from Student_Marks where RollNo IN
+ (Select RollNo from Student where city='Noida');
+/*
+6	21	65	43
+7	34	78	54
+*/
+```
+![Alt text](image-178.png)
+```sql
+-- How to find marks of Student who Not live in Noida city
+Select * from Student_Marks where RollNo NOT IN
+ (Select RollNo from Student where city='Noida');
+/*
+1	34	78	54
+2	78	43	87
+3	45	32	78
+4	36	78	32
+5	12	22	67
+8	89	78	54
+9	76	78	54
+10	22	56	54
+*/
+
+```
+![Alt text](image-179.png)
+#### Any Operator
+- Any Operator ye boolean value return karta
+- ye subquery se jo result milenga usko main query mein search karenga
+- mile to display kar denga result
+- Any ke sath aap > = <  ye use kar sakte hai for multiple row return
+
+![Alt text](image-180.png)
+```sql
+-- How to find marks of Student who Not live in Noida city
+Select * from Student_Marks where RollNo =ANY
+ (Select RollNo from Student where city='Noida');
+/*
+6	21	65	43
+7	34	78	54
+*/
+
+Select * from Student_Marks where RollNo >ANY
+ (Select RollNo from Student where city='Noida');
+/*
+7	34	78	54
+8	89	78	54
+9	76	78	54
+10	22	56	54
+
+subquery return karnegi 6,7
+  >Any mane 6 se bada
+  to 7 include karke sare result display kare jo bade the.  
+
+  vice versa if you use
+  <ANY i.e less than Any
+*/
+Select * from Student_Marks where RollNo <ANY
+ (Select RollNo from Student where city='Noida');
+/*
+1	34	78	54
+2	78	43	87
+3	45	32	78
+4	36	78	32
+5	12	22	67
+6	21	65	43
+*/
+```
+#### Insert Into Subquery
+- hume isse use karke ek table ka data dusre table mein copy kar sakte.
+```sql
+Select  * from Student_Marks;
+/*
+1	34	78	54
+2	78	43	87
+3	45	32	78
+4	36	78	32
+5	12	22	67
+6	21	65	43
+7	34	78	54
+8	89	78	54
+9	76	78	54
+10	22	56	54
+*/
+
+Create table Student_BaK
+(
+  RollNo Int,
+  Science Int,
+  Math Int,
+  Eng Int
+)
+
+Select * from Student_BaK;
+-- No data
+
+-- Hum student_marks ye table ko Student_Bak mein copy karna chahte hai
+--Insert Into Table Name(col yuou require) 
+Insert Into Student_Bak(RollNo,Science,Math,Eng)
+ Select RollNo,Science,Math,Eng from Student_Marks;
+
+Select * from Student_BaK;
+/*
+1	34	78	54
+2	78	43	87
+3	45	32	78
+4	36	78	32
+5	12	22	67
+6	21	65	43
+7	34	78	54
+8	89	78	54
+9	76	78	54
+10	22	56	54
+*/
+
+Create table Student_BaK1
+(
+  RollNo Int,
+  Science Int,
+  Math Int,
+  Eng Int,
+  Total Int
+)
+
+Select * from Student_BaK1;
+-- No data
+
+Insert Into Student_BaK1(RollNo,Science,Math,Eng)
+ Select RollNo,Science,Math,Eng from Student_Marks;
+
+Select * from Student_BaK1;
+/*
+1	34	78	54	NULL
+2	78	43	87	NULL
+3	45	32	78	NULL
+4	36	78	32	NULL
+5	12	22	67	NULL
+6	21	65	43	NULL
+7	34	78	54	NULL
+8	89	78	54	NULL
+9	76	78	54	NULL
+10	22	56	54	NULL
+
+Total ka value aapka null aa raha hai
+ Student_marks mein Total field nahi hai
+
+ hume isko as a calculated column yyaha par copy kar sakte.
+*/
+Insert Into Student_BaK1(RollNo,Science,Math,Eng,Total)
+ Select RollNo,Science,Math,Eng,(Science + Math + Eng) from Student_Marks;
+
+Select * from Student_BaK1;
+/*
+1	34	78	54	NULL
+2	78	43	87	NULL
+3	45	32	78	NULL
+4	36	78	32	NULL
+5	12	22	67	NULL
+6	21	65	43	NULL
+7	34	78	54	NULL
+8	89	78	54	NULL
+9	76	78	54	NULL
+10	22	56	54	NULL
+1	34	78	54	166
+2	78	43	87	208
+3	45	32	78	155
+4	36	78	32	146
+5	12	22	67	101
+6	21	65	43	129
+7	34	78	54	166
+8	89	78	54	221
+9	76	78	54	208
+10	22	56	54	132
+*/
+```
+#### Delete in Subquery query 
+```sql
+/*
+ Delete in Subquery query 
+
+ Delete whose total i.e(Science+Math+Eng)  < 150 
+*/
+
+Delete from Student_BaK1 where RollNo In
+ (Select RollNo from Student_Marks where (Science+Math+Eng) < 150);
+
+Select * from Student_BaK1;
+/*
+1	34	78	54	NULL
+2	78	43	87	NULL
+3	45	32	78	NULL
+7	34	78	54	NULL
+8	89	78	54	NULL
+9	76	78	54	NULL
+1	34	78	54	166
+2	78	43	87	208
+3	45	32	78	155
+7	34	78	54	166
+8	89	78	54	221
+9	76	78	54	208
+*/
+```
+#### Correlated subquery
+- Correlated subquery ke andar jo data hota hai wo outer query ke data ke upar depend karta hai.
+- outer query se data pass honga subquery ko
+- aur subquery is data ko process karengi sari row ke liye.
+
+![Alt text](image-181.png)![Alt text](image-182.png)
+```sql
+
+Create table Employee5
+(
+	emp_id Int,
+	salary Int
+)
+
+Insert Into Employee5 Values(1,3000);
+Insert Into Employee5 Values(2,2345);
+Insert Into Employee5 Values(3,7666);
+Insert Into Employee5 Values(4,3000);
+Insert Into Employee5 Values(5,7666);
+Insert Into Employee5 Values(6,5000);
+Insert Into Employee5 Values(7,6000);
+
+Select * from Employee5;
+/*
+1	3000
+2	2345
+3	7666
+4	3000
+5	7666
+6	5000
+7	6000
+
+Parnet Row Value # Operator   # Number less than Parent row value  # Distinct count
+7666                <=           7666  7666                            1
+6000                <=           6000                                  1
+5000                <=           5000                                  1
+3000                <=           3000  3000                            1
+2345                <=           2345                                  1
+
+
+1st table ke value <= second table ke sare row se compare karke 
+    output produce karti hai. 
+
+isse table se hume highest salary nikalni hai
+2nd highest
+*/
+
+Select count(salary) from Employee5;
+-- 7 total salary 7 hai
+
+Select count(Distinct salary) from Employee5;
+-- 5 distinct i.e unique salary 5 hai.
+
+--2nd highest salary
+Select salary from Employee5 emp1 where 2=
+	(Select count(Distinct Salary) 
+	    From Employee5 emp2  where emp1.salary <= emp2.salary);
+/*
+Output : 6000
+
+subquery ke andar mein yadi aapka main query ka refrence hota hai 
+ usse correlate subquery kehte hai
+
+ yaha emp2 ye refrence hai outer query ka actually Employee5 table ka
+
+ 2= ka matlab hamari 2nd highest salary hai
+*/
+
+--3rd highest salary
+Select salary from Employee5 emp1 where 3=
+	(Select count(Distinct Salary) 
+	    From Employee5 emp2  where emp1.salary <= emp2.salary);
+-- 5k
+
+--4rth highest salary
+Select salary from Employee5 emp1 where 4=
+	(Select count(Distinct Salary) 
+	    From Employee5 emp2  where emp1.salary <= emp2.salary);
+-- 3k
+```
+
+![Alt text](image-183.png)![Alt text](image-184.png)![Alt text](image-185.png)![Alt text](image-186.png)
 
 
 
