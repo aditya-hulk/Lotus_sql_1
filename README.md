@@ -4677,6 +4677,257 @@ Select * from Employee where empid = 1015;
 - aapne data updata ya delete kiya
 - to sql server data ko rearrange karenga..
 # 20. Group By or having clause
+- groupBy generally reporting purpose ke liye use hota hai, jaha apko data ko summarize karna hai aur visualize karna hai.
+- Sql server mien select Statement ke sath use hota hia
+- aggregate function use kar sakte iske sath.
+
+![Alt text](image-165.png)![Alt text](image-166.png)![Alt text](image-167.png)![Alt text](image-168.png)
+```sql
+use MyDatabase;
+
+Create Table Employee4
+(
+	empId Int,
+	empName Varchar(100),
+	deptId Int,
+	salary Int,
+	joinYear Int
+)
+
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1001,'John',2,3000,2021);
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1002,'Smith',1,4000,2020);
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1003,'King',3,6000,2019);
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1004,'Milia',2,5500,2021);
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1005,'Linda',2,3200,2022);
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1006,'Tony',3,6700,1990);
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1007,'Joshep',1,7800,2020);
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1009,'Alice',3,2100,2021);
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1009,'Mangu',2,2200,2022);
+Insert Into Employee4(empId,empName,deptId,salary,joinYear)
+  Values(1010,'David',1,1100,2022);
+
+Select * from Employee4;
+/*
+1001	John	2	3000	2021
+1002	Smith	1	4000	2020
+1003	King	3	6000	2019
+1004	Milia	2	5500	2021
+1005	Linda	2	3200	2022
+1006	Tony	3	6700	1990
+1007	Joshep	1	7800	2020
+1009	Alice	3	2100	2021
+1009	Mangu	2	2200	2022
+1010	David	1	1100	2022
+*/
+
+/*
+Hume dept wise salary nikalni hai,
+   ki konse dept mein kitni total salary de rahe hai.
+
+ Solution:  DeptId se Group karna hai, aur uski Summation of salary chaiye.
+*/
+Select sum(salary)
+     from Employee4
+	 Group By deptId;
+/*
+12900
+13900
+14800
+
+ Humne yaha Grouping kari hai deptId ke base par,
+   fhir aggrgarte function use karke iska desired result nikala.
+
+Normally, Jaise hamare pass hardcode list hai jisme  multiple deptId hai
+   to hum sare employee ko differ karenge unka group banayenge..
+fhir salary nikalenga.
+*/
+--More specifc
+  -- kis dept ke konsi id ka avg salary hai
+Select deptId,sum(salary)  from Employee4
+  Group By deptId;
+ /*
+1	12900
+2	13900
+3	14800
+ */
+
+--Yadi hum ave query chalaye.
+Select *  from Employee4
+  Group By deptId;
+ /*
+ Error:
+ Column 'Employee4.empId' is invalid in the select list because it is not contained in either
+ an aggregate function or the GROUP BY clause.
+ */
+
+-- Average salary har dept mein kitni hai
+Select  deptId,sum(salary) as TotalSalDeptWise,AVG(salary) As AvgSal from Employee4
+Group By deptId;
+/*
+1	12900	4300
+2	13900	3475
+3	14800	4933
+*/
+
+--Hume maximum sal aur min sal bhi chaiye
+Select deptId,sum(salary)as TotalSal,Avg(salary) AS AvgSal, 
+   min(salary)as MinSal ,MAX(salary) as MaxSal  From Employee4
+ Group By deptId;
+/*
+id  tsal    Asal   MiSal   maxSal
+1	12900	4300	1100	7800
+2	13900	3475	2200	5500
+3	14800	4933	2100	6700
+*/
+
+-- Kis dept mein total employee kitne hai
+-- (deptId jitni baar aavenga utni baar employee hue hai)
+Select deptId,sum(salary)as TotalSal,Avg(salary) AS AvgSal, 
+   min(salary)as MinSal ,MAX(salary) as MaxSal, 
+   Count(deptId) as TotEmp From Employee4
+ Group By deptId;
+
+ Select deptId,sum(salary)as TotalSal,Avg(salary) AS AvgSal, 
+   min(salary)as MinSal ,MAX(salary) as MaxSal, 
+   Count(empId) as TotEmp From Employee4
+ Group By deptId;
+ /*
+ 1	12900	4300	1100	7800	3
+2	13900	3475	2200	5500	4
+3	14800	4933	2100	6700	3
+ */
+```
+### Group By on multi col
+![Alt text](image-169.png)
+```sql
+
+-- Group By on multi column
+--count the emp with similar dept
+Select deptId,count(deptId) as TotalEmp  from Employee4
+Group By deptId;
+/*
+dI  TEmp
+1	3
+2	4
+3	3
+*/
+-- count the emp with similar dept & similar joining year
+Select deptId,joinYear,count(deptId) as TotalEmp from Employee4
+Group By deptId,joinYear;
+/*
+dId Year   Tot
+3	1990	1
+3	2019	1
+1	2020	2
+2	2021	2
+3	2021	1
+1	2022	1
+2	2022	2
+*/
+```
+### Order by 
+```sql
+--Order by
+-- appko group ko asending ya descending mein diplay karna hai toh aap
+-- order by use karo
+Select deptId,joinYear,count(deptId) as TotalEmp from Employee4
+Group By deptId,joinYear Order by deptId;
+/*
+1	2020	2
+1	2022	1
+2	2021	2
+2	2022	2
+3	1990	1
+3	2019	1
+3	2021	1
+
+Remember - Order by hamesha group by clause ke baadd avenga.
+Order By depId  ascending order mien liya
+*/
+
+Select deptId,joinYear,count(deptId) as TotalEmp from Employee4
+Group By deptId,joinYear Order by deptId desc;
+/*
+3	1990	1
+3	2019	1
+3	2021	1
+2	2021	2
+2	2022	2
+1	2020	2
+1	2022	1
+*/
+```
+### Where clause
+![Alt text](image-170.png)
+```sql
+/*
+where clause :
+  - aap group by ke sath use kar sakte hai
+  - individual records ko filter karna
+  - aur ye Group By clause se pehle use hota hai
+
+  Find the total salary and avg salary in department 1 and 3
+*/
+Select  deptId,sum(salary) as TotSal,avg(salary) as AvgSal 
+  from Employee4 
+  where deptId In(1,3)
+Group by deptId;
+/*
+id  Tsal     Asal
+1	12900	4300
+3	14800	4933
+
+pehle where clause filter karbe 
+  fhir grouping hoye
+*/
+```
+### having clause
+- ye sirf group by clause ke sath hi use hota
+- jo bhi data aapka group hokar aata hai, having clause usko filter karta hai.
+- aap isme condition de sakte.
+- where clause aur having clause dono aap ek sath group by mein use kar sakte.
+- ***where clause*** ye data ko i.e row ko individually filter karta hai aur ***having*** clause whole group ko col ko filter karta.
+
+![Alt text](image-171.png)![Alt text](image-172.png)
+```sql
+/*
+Where and having clause:
+ Find the total salary in dept 1 and 3 
+   and group total sal shoulb be greater than 13K
+*/
+Select deptid,sum(salary) as TotalSal
+  from  Employee4
+   where deptId In(1,3)
+  Group by deptId;
+ /*
+1	12900
+3	14800
+ */
+
+Select deptId, sum(salary)  as TotalSal
+from  Employee4
+where deptId In(1,3)
+  Group by deptId
+having sum(salary) >13000;
+/*
+3	14800
+
+having ke andar 
+  aap aggregate function use kar sakte.
+*/
+```
+# 21. Sql sub query
+
+
 
 
 
