@@ -20,3 +20,5 @@
 ### 19. Sql Indexes 
 ### 20. Group By or having clause
 ### 21. Sql sub query 
+### 22. Windows Function
+### 23. Sql merge statement

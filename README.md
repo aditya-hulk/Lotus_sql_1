@@ -5298,6 +5298,540 @@ Select salary from Employee5 emp1 where 4=
 ```
 
 ![Alt text](image-183.png)![Alt text](image-184.png)![Alt text](image-185.png)![Alt text](image-186.png)
+# 22. Windows Function
+- aapke aggregate function(MIN,MAX,AVG,SUM etc)ye single col ko scan karte hai, waha ki value uthakar aapko single value return karte hai/ output dete hai..
+- Window function bhi aggregate operation  karta hai, but wo result har 1 row ke liye show karta hai. 
+- see eg in dig, aggregate se hume 1 value mile while window fun se multiple.
+
+![Alt text](image-187.png)![Alt text](image-188.png)
+```sql
+/*
+Window Function : 
+   Over() - 
+      - It is replacement of Group By.
+	  - Jab aap Over() use karenge tab Group By use nhi kar paonge.
+	  - Group By mein single row return hongi.
+	  - It creates a window with multiple rows.
+*/
+use MyDatabase;
+
+Create Table EmployeeSales
+(
+	emp_id Int,
+	dept Int,
+	product_id Int,
+	qty Int,
+	sales Int,
+	sales_year Int
+)
+
+Insert Into EmployeeSales Values(100,1,1,21,200,2000);
+Insert Into EmployeeSales Values(101,1,1,21,150,2001);
+Insert Into EmployeeSales Values(102,2,2,45,211,2002);
+Insert Into EmployeeSales Values(103,3,2,21,2345,2003);
+Insert Into EmployeeSales Values(100,1,3,45,322,2004);
+Insert Into EmployeeSales Values(104,3,2,45,4000,2005);
+Insert Into EmployeeSales Values(105,1,3,56,322,2006);
+Insert Into EmployeeSales Values(106,2,2,32,322,2007);
+Insert Into EmployeeSales Values(101,2,3,22,322,2008);
+Insert Into EmployeeSales Values(103,3,3,44,3211,2009);
+Insert Into EmployeeSales Values(104,3,2,66,4000,2010);
+
+select * from EmployeeSales;
+/*
+eId dId PId qty sales  sales_year
+100	1	1	21	200		2000
+101	1	1	21	150		2001
+102	2	2	45	211		2002
+103	3	2	21	2345	2003
+100	1	3	45	322		2004
+104	3	2	45	4000	2005
+105	1	3	56	322		2006
+106	2	2	32	322		2007
+101	2	3	22	322		2008
+103	3	3	44	3211	2009
+104	3	2	66	4000	2010
+
+empId 100 uska dept 1 usene konsa product becha uski id 1
+  kitni qty bechi 21 sales kitna hua 200 and konse year 2000
+*/
+
+--Find sales dept wise along with emp_id & product_id details.
+
+--Group by se try karte
+Select dept,sum(sales) from EmployeeSales Group by dept;
+/*
+1	994
+2	855
+3	13556
+
+hume yaha dept wise sales to mil raha hai
+  but hume iski empId aur productId bhi chaiye.
+*/
+
+Select emp_id,dept,sum(sales) from EmployeeSales Group by dept;
+/*
+Column 'EmployeeSales.emp_id' is invalid in the select list because it is not contained
+in either an aggregate function or the GROUP BY clause.
+
+dept aapka Group by i.e aggregation mein include hai
+sum(sales) ye aapka aggregate function hai
+emp_id kahi include nhi isiliye error.
+
+So basically aggregation aur non-aggregation ko mix nhi kar sakte.
+
+So what is solution?
+ Go for over() 
+
+ Over is a replacement of Group By.
+
+*/
+
+Select sum(sales)  from  EmployeeSales
+--15405 ye single col value mila
+ -- mane hum window function use nhi kar rahe hai.
+
+ Select sum(sales) Over() as 'Total-Sales' from  EmployeeSales
+ /*
+15405
+15405
+15405
+15405
+15405
+15405
+15405
+15405
+15405
+15405
+15405
+
+jitni row thi(i.e 11) isne utne hi total sales ko yaha par display kar diya.
+
+but hume dept ke sath aur bhi details chaiye
+ */
+ Select emp_id,product_id,sum(sales) Over() as 'Total-Sales' from  EmployeeSales
+ /*
+eId Pid  total sale
+100	1	15405
+101	1	15405
+102	2	15405
+103	2	15405
+100	3	15405
+104	2	15405
+105	3	15405
+106	2	15405
+101	3	15405
+103	3	15405
+104	2	15405
+
+This is the use of Over() function.
+ ye har row ke liye aapka aggregation karta hai
+unlike Group by jo aggregation mein keval 1 baar result return karta hai.
+
+Still hamari requirement puri nhi hue hai
+  kyuki total sale nikalna hai dept wise.
+ */
+```
+![Alt text](image-189.png)
+#### Partition by
+```sql
+Select emp_id,dept,product_id,sum(sales) Over() as 'Total-Sales' from  EmployeeSales
+/*
+emp dI Pid  totsale
+100	1	1	15405
+101	1	1	15405
+102	2	2	15405
+103	3	2	15405
+100	1	3	15405
+104	3	2	15405
+105	1	3	15405
+106	2	2	15405
+101	2	3	15405
+103	3	3	15405
+104	3	2	15405
+
+Abhi hume dept wise Total sales nhi mil rahe hai
+  uske liye table ko partition kar sakte hai dept wise
+
+Use Concept of Partition By
+*/
+/*
+	PARTITION BY : 
+	  The PARTITION BY  clause use to divide the result set from the query into data Subsets.
+
+	  aapke col ke base par result set ko divide kar deta hai 
+	  ye over() function ke ander use hota hai
+*/
+Select emp_id,dept,product_id,sum(sales) Over(Partition By dept) as 'Total-Sales' from  EmployeeSales
+/*
+100	1	1	994
+101	1	1	994
+105	1	3	994
+100	1	3	994
+106	2	2	855
+101	2	3	855
+102	2	2	855
+103	3	2	13556
+103	3	3	13556
+104	3	2	13556
+104	3	2	13556
+*/
+```
+![Alt text](image-190.png)
+### Rank()
+```sql
+/*
+Windoe function : Rank()
+        -The rank() window function returns a unique rank number for each distinct row
+		  within the partition according to the specified column value.
+		-Rank() fucntion always work on Over() function with Order By clause.
+		-Hum Students ko rank dete hai, ksis student ne top kiya toh hum usse dete hai rank1
+		  next toper ko 2nd rank so on so forth
+*/
+-- jo hamari highest sales hai usko rank 1 denge.
+   -- aur jaha 2 figure ek jaise usse hum same rank denge.
+/*
+   rank() yu over() function ke sath kaam karta
+    aur usme Order by must hai
+order by ascending/desending
+*/
+
+Select emp_id,dept,product_id,sales, Rank() Over(Order by sales desc) As 'Sales_Rank' 
+from EmployeeSales;
+/*
+eid de Pid  Sale  Sales_Rank
+104	3	2	4000	1
+104	3	2	4000	1
+103	3	3	3211	3
+103	3	2	2345	4
+100	1	3	322		5
+105	1	3	322		5
+106	2	2	322		5
+101	2	3	322		5
+102	2	2	211		9
+100	1	1	200		10
+101	1	1	150		11
+
+-Jo figure same hai usse same rank assign kar diya hai
+
+-Yaha par dept wise partitioned nhi hua hai,
+  jo highest sales hai usse ranking mil rahi hai
+
+  so dept wise partitioned karke rank dispaly kariye.
+*/
+Select emp_id,product_id,dept,sales, Rank() Over(Partition by dept Order by sales desc) As 'Sales_Rank' 
+from EmployeeSales;
+/*
+Ei  Pi Dept Sale  saleRank
+105	3	1	322		1
+100	3	1	322		1
+100	1	1	200		3
+101	1	1	150		4
+106	2	2	322		1
+101	3	2	322		1
+102	2	2	211		3
+104	2	3	4000	1
+104	2	3	4000	1
+103	3	3	3211	3
+103	2	3	2345	4
+
+Abhi partitioned karke usme ranking ki hai
+ 
+ - yaha ranking mein gap dikh raha hai
+Ei  Pi Dept Sale  saleRank
+105	3	1	322		1           1 
+100	3	1	322		1           1                   kyuki wo yaha 2 consider kar raha hai,but same sale same rank
+100	1	1	200		3           2 chaiye tha 3 mila
+*/
+```
+![Alt text](image-191.png)
+### Dense_Rank()
+```sql
+/*
+Window Function : Dense_Rank()
+     This function is similar to Rank() except for 1 difference i.e it doesn't skip 
+	    any ranks while ranking the rows.
+*/
+
+Select emp_id,product_id,dept,sales, 
+Rank() Over(Partition by dept Order by sales desc) As 'Sales_Rank',
+Dense_Rank() Over(Partition by dept Order by sales desc) As 'Dense_Rank' 
+from EmployeeSales;
+/*
+Eid PI Dept Sale  SaR  DenseRank
+105	3	1	322		1	1
+100	3	1	322		1	1
+100	1	1	200		3	2
+101	1	1	150		4	3
+
+106	2	2	322		1	1
+101	3	2	322		1	1
+102	2	2	211		3	2
+
+104	2	3	4000	1	1
+104	2	3	4000	1	1
+103	3	3	3211	3	2
+103	2	3	2345	4	3
+
+Ye rank ko skip nahi karta
+  jo rank() function ka problem tha
+wo solve kar diya.
+*/
+```
+![Alt text](image-192.png)
+### Row_Number()
+```sql
+/*
+  Window Function :	Row_Number()
+   We use Row_Number() SQl Rank function to get a unique sequential number 
+    for each row in a specified data.
+
+ - ye har ek row ko number assign kar deta hai
+ - 1 se start hota hai
+ - aur sequnencly aapka number increase hota rehta hai.
+*/
+
+Select emp_id,product_id,dept,sales, 
+Row_Number()  Over( Order by sales desc) as 'Row_Number'
+from EmployeeSales;
+/*
+Eid Pi Dep  Sales  RowNumber
+104	2	3	4000	1
+104	2	3	4000	2
+103	3	3	3211	3
+103	2	3	2345	4
+100	3	1	322		5
+105	3	1	322		6
+106	2	2	322		7
+101	3	2	322		8
+102	2	2	211		9
+100	1	1	200		10
+101	1	1	150		11
+
+ - ye unique number hai
+ - aap isko sql sequence paging ke liye use kar sakte hai
+*/
+
+-- ab hume rowNumber chaiye but paritioned ke sath dept wise
+Select emp_id,product_id,dept,sales, 
+Row_Number()  Over(Partition By dept Order by sales desc) as 'Row_Number'
+from EmployeeSales;
+/*
+Eid Pi Dep  Sales  RowNumber
+105	3	1	322		1
+100	3	1	322		2
+100	1	1	200		3
+101	1	1	150		4
+
+106	2	2	322		1
+101	3	2	322		2
+102	2	2	211		3
+
+104	2	3	4000	1
+104	2	3	4000	2
+103	3	3	3211	3
+103	2	3	2345	4
+*/
+```
+### NTILE(N)
+```sql
+/*
+NTile SQl Rank Function:
+  It distributes the rows in the specified n numbers of groups.
+
+  -aap apne data ki grouping kar sakte hai
+*/
+
+Select emp_id,product_id,dept,sales,
+NTile(1) Over(order by sales desc) As 'N-Tile-Number'
+from EmployeeSales
+/*
+104	2	3	4000	1
+104	2	3	4000	1
+103	3	3	3211	1
+103	2	3	2345	1
+100	3	1	322		1
+105	3	1	322		1
+106	2	2	322		1
+101	3	2	322		1
+102	2	2	211		1
+100	1	1	200		1
+101	1	1	150		1
+
+hamare pass 11 row hai
+ NTile(1) hai
+  to ye 11 /1 se divide karenga 
+    aur wise rank denga
+*/
+
+Select emp_id,product_id,dept,sales,
+NTile(2) Over(order by sales desc) As 'N-Tile-Number'
+from EmployeeSales
+/*
+104	2	3	4000	1
+104	2	3	4000	1
+103	3	3	3211	1
+103	2	3	2345	1
+100	3	1	322		1
+105	3	1	322		1
+106	2	2	322		2
+101	3	2	322		2
+102	2	2	211		2
+100	1	1	200		2
+101	1	1	150		2
+
+ye 11/2 se divide karke group banayenga
+*/
+
+Select emp_id,product_id,dept,sales,
+NTile(3) Over(order by sales desc) As 'N-Tile-Number'
+from EmployeeSales
+/*
+104	2	3	4000	1
+104	2	3	4000	1
+103	3	3	3211	1
+103	2	3	2345	1
+100	3	1	322		2
+105	3	1	322		2
+106	2	2	322		2
+101	3	2	322		2
+102	2	2	211		3
+100	1	1	200		3
+101	1	1	150		3
+*/
+
+/*
+ Lag() and Lead() function
+   The Lag() function has an ability to fetch the data from previous row.
+   The lead() function has an ability to fetch the data from subsequent row.
+
+   Hume Previous year ki sales dekhni hai
+*/
+
+Select emp_id,product_id,dept,sales,sales_year,
+Lag(sales) Over( order by sales_year asc) as 'Previous_Year_sales' 
+from EmployeeSales;
+/*
+eID Pi Dep Sales  Sales_y  Prvious_year_sale 
+100	1	1	200		2000	NULL
+101	1	1	150		2001	200
+102	2	2	211		2002	150
+103	2	3	2345	2003	211
+100	3	1	322		2004	2345
+104	2	3	4000	2005	322
+105	3	1	322		2006	4000
+106	2	2	322		2007	322
+101	3	2	322		2008	322
+103	3	3	3211	2009	322
+104	2	3	4000	2010	3211
+
+-aapka sales year 2000 ka sales 200 hai 
+  yekin previous year ka sale available nhi hai islliye 
+   Null aaya
+*/
+
+-- waise hi hume next year sales dekhna raha
+Select emp_id,product_id,dept,sales,sales_year,
+Lead(sales) Over( order by sales_year asc) as 'Next_Year_sales' 
+from EmployeeSales;
+/*		
+							Next_year_sales
+100	1	1	200		2000	150
+101	1	1	150		2001	211
+102	2	2	211		2002	2345
+103	2	3	2345	2003	322
+100	3	1	322		2004	4000
+104	2	3	4000	2005	322
+105	3	1	322		2006	322
+106	2	2	322		2007	322
+101	3	2	322		2008	3211
+103	3	3	3211	2009	4000
+104	2	3	4000	2010	NULL
+*/
+
+--dono ek sath bhi dekh sakte
+Select emp_id,product_id,dept,sales,sales_year,
+Lag(sales) Over( order by sales_year asc) as 'Previous_Year_sales',
+Lead(sales) Over( order by sales_year asc) as 'Next_Year_sales' 
+from EmployeeSales;
+/*
+					Year  PrvYear  NextYar
+100	1	1	200		2000	NULL	150
+101	1	1	150		2001	200		211
+102	2	2	211		2002	150		2345
+103	2	3	2345	2003	211		322
+100	3	1	322		2004	2345	4000
+104	2	3	4000	2005	322		322
+105	3	1	322		2006	4000	322
+106	2	2	322		2007	322		322
+101	3	2	322		2008	322		3211
+103	3	3	3211	2009	322		4000
+104	2	3	4000	2010	3211	NULL
+*/
+
+/*
+ First_Value() 
+    It return the first value
+ 
+  Last_Value()
+   it return the last value.
+*/
+
+-- sales ki first value dikhne ko hona
+Select emp_id,product_id,dept,sales,sales_year,
+First_value(sales) Over( order by sales_year asc) as 'First_vAlue' 
+from EmployeeSales;
+/*
+100	1	1	200		2000	200
+101	1	1	150		2001	200
+102	2	2	211		2002	200
+103	2	3	2345	2003	200
+100	3	1	322		2004	200
+104	2	3	4000	2005	200
+105	3	1	322		2006	200
+106	2	2	322		2007	200
+101	3	2	322		2008	200
+103	3	3	3211	2009	200
+104	2	3	4000	2010	200
+*/
+-- sales ki first value dikhne ko hona
+Select emp_id,product_id,dept,sales,sales_year,
+First_value(sales) Over( Partition by dept order by sales_year asc) as 'First_vAlue' 
+from EmployeeSales;
+/*
+100	1	1	200		2000	200
+101	1	1	150		2001	200
+100	3	1	322		2004	200
+105	3	1	322		2006	200
+102	2	2	211		2002	211
+106	2	2	322		2007	211
+101	3	2	322		2008	211
+103	2	3	2345	2003	2345
+104	2	3	4000	2005	2345
+103	3	3	3211	2009	2345
+104	2	3	4000	2010	2345
+*/
+-- sales ki last value dikhne ko hona
+Select emp_id,product_id,dept,sales,sales_year,
+Last_value(sales) Over(  order by sales_year desc) as 'Last_vAlue' 
+from EmployeeSales;
+/*
+104	2	3	4000	2010	4000
+103	3	3	3211	2009	3211
+101	3	2	322		2008	322
+106	2	2	322		2007	322
+105	3	1	322		2006	322
+104	2	3	4000	2005	4000
+100	3	1	322		2004	322
+103	2	3	2345	2003	2345
+102	2	2	211		2002	211
+101	1	1	150		2001	150
+100	1	1	200		2000	200
+
+last sales ki value dikhengi
+*/
+```
+# 23. Sql merge statement
 
 
 
