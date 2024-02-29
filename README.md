@@ -5831,10 +5831,247 @@ from EmployeeSales;
 last sales ki value dikhengi
 */
 ```
-# 23. Sql merge statement
+# 23. Sql Roll Up and Cube
+- Ye dono reporting purpose ke liye use hote hai.
+- hum Group By clause se data ko aggregate karte hai.
+- Par Grand total nikalna group By mein possible nahi hai
 
+![Alt text](image-193.png)
+```sql
+use MyDatabase;
+/*
+RollUP:
+   RollUp operators let you extend the functionality of Group By Clause by calculating
+    subtotal and grandtotal for a set of column.
+*/
+Create Table RollUpTest
+(
+	id Int,
+	name Varchar(100),
+	gender Varchar(50),
+	salary Int,
+	department Varchar(100)	
+)
 
+Insert Into RollUpTest Values(1,'Moly','Male',5000,'Sales');
+Insert Into RollUpTest Values(2,'Jimmy','Female',6000,'HR');
+Insert Into RollUpTest Values(3,'Katal','Female',7500,'IT');
+Insert Into RollUpTest Values(4,'Lenda','Male',6500,'Marketing');
+Insert Into RollUpTest Values(5,'Shnana','Female',5500,'Finance');
+Insert Into RollUpTest Values(6,'Mike','Male',8000,'Sales');
+Insert Into RollUpTest Values(7,'Tony','Male',7200,'HR');
+Insert Into RollUpTest Values(8,'Lorry','Female',6600,'IT');
+Insert Into RollUpTest Values(9,'Kene','Female',5400,'Marketing');
+Insert Into RollUpTest Values(10,'Hary','Female',6300,'Finance');
+Insert Into RollUpTest Values(11,'Potter','Male',5700,'Sales');
+Insert Into RollUpTest Values(12,'Zim Kerry','Male',7000,'HR');
+Insert Into RollUpTest Values(13,'Mikel','Female',7100,'IT');
+Insert Into RollUpTest Values(14,'Jakson','Female',6800,'Marketing');
+Insert Into RollUpTest Values(15,'Warden','Male',5000,'Finance');
 
+Select * from RollUpTest;
+/*
+1	Moly		Male	5000	Sales
+2	Jimmy		Female	6000	HR
+3	Katal		Female	7500	IT
+4	Lenda		Male	6500	Marketing
+5	Shnana		Female	5500	Finance
+6	Mike		Male	8000	Sales
+7	Tony		Male	7200	HR
+8	Lorry		Female	6600	IT
+9	Kene		Female	5400	Marketing
+10	Hary		Female	6300	Finance
+11	Potter		Male	5700	Sales
+12	Zim Kerry	Male	7000	HR
+13	Mikel		Female	7100	IT
+14	Jakson		Female	6800	Marketing
+15	Warden		Male	5000	Finance
+
+Query : 
+    Hume department ke hisab se salary ko calculate karna hai
+	  kis dept mein total sal kitni hai.
+*/
+Select department,sum(salary) 
+      from RollUpTest 
+	    Group By department ;
+/*
+Finance		16800
+HR			20200
+IT			21200
+Marketing	18700
+Sales		18700
+
+Department wise salary grouping hoke hume dikh rahi hai
+  but ye sare salary ka hamare pass Grand total nahi hai.
+For this case
+   use concept of RollUp
+ 
+RollUp
+   ye extention hai group by ka
+*/
+Select department,sum(salary) 
+      from RollUpTest 
+	    Group By RollUP(department) ;
+/*
+Finance		16800
+HR			20200
+IT			21200
+Marketing	18700
+Sales		18700
+NULL		95600
+
+Last mein ek row add ho gyi hai
+  jiska Department col mein Null hai
+and aggregate col mein Total hai (mane sum(salary) ka aggregate)
+95600 = 16800 + 20200 + 21200 + 18700 + 18700
+
+Query :
+  Ab hume Null ki jagah Total ya grand total print karna hai
+use Coalesce() function
+  Coalesce(department,'Total')
+  - isme 2 parameter supply hote hai
+  - 1st para col name yaha dept
+  - 2nd para mein vo value 
+     yadi aapka col kahi null aaya to 2nd para ke isse replace honga.
+*/
+
+Select Coalesce(department,'Total'),sum(salary) 
+      from RollUpTest 
+	    Group By RollUP(department) ;
+/*
+Finance		16800
+HR			20200
+IT			21200
+Marketing	18700
+Sales		18700
+Total		95600
+*/
+```
+![Alt text](image-194.png)
+### Rollup with multi col
+```sql
+/*
+	Ab tak humne rollup mein single col use kiya
+Ab hum RollUp mein multiple col use karenge.
+
+Query:
+ Hume rollup mein dept ke sath gender bhi chahiye
+*/
+Select Coalesce(department,'Total'), gender ,sum(salary)
+    from RollUpTest
+	 Group by  RollUp(department,gender);
+/*
+
+Finance		Female	11800
+Finance		Male	5000
+Finance		NULL	16800
+HR			Female	6000
+HR			Male	14200
+HR			NULL	20200
+IT			Female	21200
+IT			NULL	21200
+Marketing	Female	12200
+Marketing	Male	6500
+Marketing	NULL	18700
+Sales		Male	18700
+Sales		NULL	18700
+Total		NULL	95600
+
+Yaha group by clause  
+  apply hua hai Department aur Gender par
+phir rollup hua hai
+
+  Finance mein		Female ne becha	11800
+  Finance	mein	Male	ne becha 5000
+  Finance		NULL     	16800
+*/
+Select Coalesce(department,'Total'),Coalesce(gender,'Total') ,sum(salary)
+    from RollUpTest
+	 Group by  RollUp(department,gender);
+/*
+Finance		Female	11800
+Finance		Male	5000
+Finance		Total	16800
+
+HR			Female	6000
+HR			Male	14200
+HR			Total	20200
+
+IT			Female	21200
+IT			Total	21200
+
+Marketing	Female	12200
+Marketing	Male	6500
+Marketing	Total	18700
+
+Sales		Male	18700
+Sales		Total	18700
+
+Total		Total	95600
+*/
+```
+![Alt text](image-195.png)
+- Finance Femal group bana 
+- Finance male group bana 
+- fhir dono finance ka total and so on so forth
+### Cube operatot
+```sql
+/*
+Sql Cube :
+ The cube operator is similar in fuctionality  to the RollUp operator.
+  However the cube operator can calculate the subtotal and grand totals for all permutation of 
+  the column specified in it.
+*/
+Select Coalesce(department,'Total'), gender ,sum(salary)
+    from RollUpTest
+	 Group by  Cube(department,gender);
+/*
+Finance		Female	11800
+HR			Female	6000
+IT			Female	21200
+Marketing	Female	12200
+Total		Female	51200
+
+Finance		Male	5000
+HR			Male	14200
+Marketing	Male	6500
+Sales		Male	18700
+Total		Male	44400
+
+Total		NULL	95600
+Finance		NULL	16800
+HR			NULL	20200
+IT			NULL	21200
+Marketing	NULL	18700
+Sales		NULL	18700
+
+isme grouping dept+ gender ki hue hai fhir total
+*/
+Select Coalesce(department,'Total'),Coalesce(gender,'SubTotal') ,sum(salary)
+    from RollUpTest
+	 Group by  Cube(department,gender);
+/*
+Finance		Female		11800
+HR			Female		6000
+IT			Female		21200
+Marketing	Female		12200
+Total		Female		51200
+
+Finance		Male		5000
+HR			Male		14200
+Marketing	Male		6500
+Sales		Male		18700
+Total		Male		44400
+
+Total		SubTotal	95600
+Finance		SubTotal	16800
+HR			SubTotal	20200
+IT			SubTotal	21200
+Marketing	SubTotal	18700
+Sales		SubTotal	18700
+*/
+```
+![Alt text](image-196.png)![Alt text](image-197.png)
 
 
 
