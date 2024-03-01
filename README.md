@@ -6072,13 +6072,894 @@ Sales		SubTotal	18700
 */
 ```
 ![Alt text](image-196.png)![Alt text](image-197.png)
+# 24. Sql stored Procedure
+- isse db object bhi kehte hai kyuki ye db mein permanantly store ho jata hai
+- agar apko koyi query baar baar execute karni hai to usse aap stored procedure ke andar likhe.
+- stored procedure ko sql server ek baar execute karta hai fhir usse cache mein rakh deta hai, next time wo cache se execute honga.
+- performance increase
 
+![Alt text](image-198.png)![Alt text](image-199.png)![Alt text](image-200.png)
+```sql
+use MyDatabase;
+/*
+How to create a Stored Procedure?
+*/
+select * from Employee4;
+/*
+eId   eName    dId  sal    joinYear
+1001	John	2	3000	2021
+1002	Smith	1	4000	2020
+1003	King	3	6000	2019
+1004	Milia	2	5500	2021
+1005	Linda	2	3200	2022
+1006	Tony	3	6700	1990
+1007	Joshep	1	7800	2020
+1009	Alice	3	2100	2021
+1009	Mangu	2	2200	2022
+1010	David	1	1100	2022
 
+Q- Hume dept 1 ka data nikalna hai?
+*/
+Select * from Employee4 where deptId = 1;
+/*
+1002	Smith	1	4000	2020
+1007	Joshep	1	7800	2020
+1010	David	1	1100	2022
 
+Ab mujhe yadi dept 1 ka data baar baar nikalna hai
+  tab ye query hume bar bar likhna honga.
 
+Solution :
+   We write this query on stored procedure.
 
+Note: 
+Naming convention : 
+  don't write sp_ in prefix 
+    This standard used in master db
+*/
 
+Create  Procedure spDepartList
+As
+Begin
+ Select * from Employee4 where deptId = 1;
+End
 
+/*
+	how to execute the stored Procedure
+*/
+--1)Just write name of procedure and executes it.
+spDepartList
 
+--2) Execute and procedure name
+Execute spDepartList
 
+--3) EXEC and Procedure name
+Exec spDepartList
+/*
+1002	Smith	1	4000	2020
+1007	Joshep	1	7800	2020
+1010	David	1	1100	2022
+*/
 
+--Creating proecedure another way.
+Create  Proc spDepartList
+As
+Begin
+ Select * from Employee4 where deptId = 1;
+End
+/*
+There is already an object named 'spDepartList' in the database.
+
+Procedure name unique mangta.
+*/
+
+Create  Proc spDepartList2
+As
+Begin
+ Select * from Employee4 where deptId = 1;
+End
+
+Exec spDepartList2
+/*
+1002	Smith	1	4000	2020
+1007	Joshep	1	7800	2020
+1010	David	1	1100	2022
+*/
+
+```
+![Alt text](image-201.png)![Alt text](image-202.png)
+### How to create Stored procedure via UI
+![Alt text](image-203.png)
+- apna sql server aapko template create kar ke de denga.
+![Alt text](image-204.png)
+### Similarly u can execute stored procedure via ui.
+![Alt text](image-205.png)![Alt text](image-206.png)![Alt text](image-207.png)
+### How to modify stored procedure.
+```sql
+use MyDatabase;
+
+--How to modify stored Procedure
+Alter  Procedure spDepartList
+As
+Begin
+ Select * from Employee4 where deptId = 1;
+ Select * from Employee4 where deptId = 2;
+End
+
+Exec spDepartList
+/*
+
+1002	Smith	1	4000	2020
+1007	Joshep	1	7800	2020
+1010	David	1	1100	2022
+
+1001	John	2	3000	2021
+1004	Milia	2	5500	2021
+1005	Linda	2	3200	2022
+1009	Mangu	2	2200	2022
+
+Alter command aapke stored procedure ko modify karke 
+  database mein save kar denga.
+*/
+```
+#### via Ui
+![Alt text](image-208.png)![Alt text](image-209.png)
+- ab aap yaha modify karenge execute karenge proc change.
+```sql
+/*
+How to drop Stored Procedure.
+*/
+Drop proc spDepartList
+
+-- If i execute it again
+spDepartList
+-- Could not find stored procedure 'spDepartList'.
+```
+![Alt text](image-210.png)
+### Drop proc via UI
+![Alt text](image-211.png)![Alt text](image-212.png)
+### Parameter in Stored Procedure.
+```sql
+/*
+	Parameter in Stored Procedure:
+		2 type of Parameter
+			1) Input Parameter
+			2) Output Parameter
+*/
+--Inki jarurat hi kyu padti hai
+Create  Proc spDepartList
+As
+Begin
+ Select * from Employee4 where deptId = 1;
+ Select * from Employee4 where empName = 'Joshep';
+End
+
+spDepartList
+/*
+1002	Smith	1	4000	2020
+1007	Joshep	1	7800	2020
+1010	David	1	1100	2022
+
+1007	Joshep	1	7800	2020
+
+Upar ke procedure mein 2 query hai
+ id=2 and empName='Joshep' 
+ye procedure ko multiple time chlane ka baad bhi mera output same rahenga.
+
+Isko yadi dyanmic banana hai
+ so use the concept of Parameter in Stored Procedure.
+
+ Input type parameter:
+*/
+Alter  Proc spDepartList
+@dept_id int,
+@emp_Name varchar(100)
+As
+Begin
+ Select * from Employee4 where deptId = @dept_id;
+ Select * from Employee4 where empName = @emp_Name;
+End
+
+/*
+ -Parmeter As ke upar define karte
+ - @ likha jata hai variable ke agge
+ - provide type of it
+*/
+--Calling proc
+spDepartList
+/*
+Error:
+Procedure or function 'spDepartList' expects parameter '@dept_id', which was not supplied.
+
+Parameter procedure ko call karne ke liye.. parameter pass karna hota hai
+*/
+
+spDepartList 1,'Joshep'
+/*
+1002	Smith	1	4000	2020
+1007	Joshep	1	7800	2020
+1010	David	1	1100	2022
+
+1007	Joshep	1	7800	2020
+
+Aapko sequence dhyan mein rakhna jaruri hai  ki pehle konsa parameter tha
+  yadi sequence ghusa to ghus javenga
+*/
+
+spDepartList 'Joshep',1
+--Error converting data type varchar to int.
+
+--Solution:
+spDepartList @emp_Name='Joshep', @dept_id=1
+/*
+1002	Smith	1	4000	2020
+1007	Joshep	1	7800	2020
+1010	David	1	1100	2022
+
+1007	Joshep	1	7800	2020
+
+also called as Name Parameter values
+ isme order matter nhi karta.
+ ------------------------------------------------
+
+ Default Parameters
+  - yadi humne procedure execute karte samay yadi
+     kuch pass nhi kiya hai so usne default value/initial value lena chaiye.
+*/
+spDepartList
+--Procedure or function 'spDepartList' expects parameter '@dept_id', which was not supplied.
+
+Alter  Proc spDepartList
+@dept_id int=1,
+@emp_Name varchar(100)='joshep'
+As
+Begin
+ Select * from Employee4 where deptId = @dept_id;
+ Select * from Employee4 where empName = @emp_Name;
+End
+
+spDepartList
+/*
+1002	Smith	1	4000	2020
+1007	Joshep	1	7800	2020
+1010	David	1	1100	2022
+
+1007	Joshep	1	7800	2020
+
+aur yadi aap execution ke samay procedure ko 
+  value dete hai, tab wo defualt value ignore marenga
+*/
+spDepartList 2,'smith'
+/*
+1001	John	2	3000	2021
+1004	Milia	2	5500	2021
+1005	Linda	2	3200	2022
+1009	Mangu	2	2200	2022
+
+1002	Smith	1	4000	2020
+*/
+```
+#### Output Parameter
+```sql
+/*
+Output Parameter  :
+	Hum calculation ko proc ke bahar bhejna cahte hai 
+	  tab hum ek parameter/variable ko  Output declare karte hai
+	   aur us varaible mein hum result store kar sakte hai
+*/
+Create Proc spAddDigit
+-- Declare variables
+	@Num1 Int,
+	@Num2 Int,
+
+-- Here output is reflected
+	@Result Int OUTPUT
+As
+ Begin
+		Set @Result = @Num1 + @Num2;
+ End
+
+-- calling Output parameter
+Declare @EID Int
+EXEC spAddDigit 2,2,@EID Output;
+Select @EID
+--4
+
+Declare @EID Int
+EXEC spAddDigit 10,2,@EID Output;
+Select @EID
+--12
+/*
+	We need to follow this syntax otherwise 
+	 will see lot of error.
+*/
+```
+### Stored procedure security with encryption
+```sql
+/*
+Yadi hume kisi Stored procedure ka text check karna hai
+  use system procedure to display it text.
+*/
+sp_helptext spAddDigit
+/*
+Create Proc spAddDigit  
+-- Declare variables  
+ @Num1 Int,  
+ @Num2 Int,  
+  
+-- Here output is reflected  
+ @Result Int OUTPUT  
+  
+As  
+ Begin  
+  Set @Result = @Num1 + @Num2;  
+ End  
+
+ Procedure ka pura ka pura text aapko display ho gya.
+
+ lekin  aapko security lagana hai
+   apke procedure ke text ko koyi muh uthake na dekh paye.
+*/
+
+Alter Proc spAddDigit
+ @Num1 Int,
+ @Num2 Int,
+ @Result Int OUTPUT
+ -- As keyword se pehle with Encryption lagaye
+ With Encryption
+As
+ Begin
+		Set @Result = @Num1 + @Num2;
+ End
+
+-- Now check
+sp_helptext spAddDigit
+-- The text for object 'spAddDigit' is encrypted.
+```
+# 25. Sql loops
+- sql suports only for while loop
+
+![Alt text](image-213.png)![Alt text](image-214.png)
+```sql
+use MyDatabase;
+/*Loop*/
+
+Declare @Count int;--Declaring a variable
+Set @Count = 2;--Initialize it
+While @Count <= 10
+ Begin
+	Print @Count
+	Set @Count = @Count + 2
+ End
+Print 'End of While loop'
+/*
+1
+2
+3
+4
+5
+End of While loop
+*/
+
+Declare @Count int;
+Set @Count = 2;
+While @Count <= 10
+ Begin
+	Print @Count
+	Set @Count = @Count + 2
+ End
+Print 'End of While loop'
+/*
+2
+4
+6
+8
+10
+End of While loop
+*/
+
+-- Print table via loop
+Declare @TableNo Int;
+Declare  @Count  Int;
+
+Set @TableNo = 10;
+Set @Count = 1
+
+While(@Count <= 10)
+ Begin
+		Print Concat(@TableNo ,' x ', @Count,'=', @TableNo*@Count);
+		Set @Count = @Count + 1;
+ End
+Print 'End of loop'
+/*
+10 x 1=10
+10 x 2=20
+10 x 3=30
+10 x 4=40
+10 x 5=50
+10 x 6=60
+10 x 7=70
+10 x 8=80
+10 x 9=90
+10 x 10=100
+End of loop
+*/
+--Break concept
+Declare @TableNo Int;
+Declare  @Count  Int;
+
+Set @TableNo = 5;
+Set @Count = 1
+
+While(@Count <= 10)
+ Begin
+		Print Concat(@TableNo ,' x ', @Count,'=', @TableNo*@Count);
+		Set @Count = @Count + 1;
+
+		if @Count = 5
+		 break;
+
+ End
+Print 'End of loop'
+/*
+5 x 1=5
+5 x 2=10
+5 x 3=15
+5 x 4=20
+End of loop
+
+When count is 5 then break
+*/
+```
+### While nested loop
+```sql
+--Nested loop
+Declare @TableNum Int
+Set @TableNum = 1;
+
+While @TableNum <= 10
+ Begin
+		Declare @InnerCount  Int = 1;
+		While @InnerCount < = 10
+		 Begin
+				Print Concat(@TableNum,' x ',@InnerCount,'  =  ',@TableNum* @InnerCount);
+
+				Set @InnerCount = @InnerCount + 1;
+		 End
+		 Print 'End of Inner loop'
+		 Print ' '		
+
+	Set @TableNum = @TableNum + 1;
+	if @TableNum = 4
+		break;
+ End
+Print 'End of outer loop'
+/*
+1 x 1  =  1
+1 x 2  =  2
+1 x 3  =  3
+1 x 4  =  4
+1 x 5  =  5
+1 x 6  =  6
+1 x 7  =  7
+1 x 8  =  8
+1 x 9  =  9
+1 x 10  =  10
+End of Inner loop
+ 
+2 x 1  =  2
+2 x 2  =  4
+2 x 3  =  6
+2 x 4  =  8
+2 x 5  =  10
+2 x 6  =  12
+2 x 7  =  14
+2 x 8  =  16
+2 x 9  =  18
+2 x 10  =  20
+End of Inner loop
+ 
+3 x 1  =  3
+3 x 2  =  6
+3 x 3  =  9
+3 x 4  =  12
+3 x 5  =  15
+3 x 6  =  18
+3 x 7  =  21
+3 x 8  =  24
+3 x 9  =  27
+3 x 10  =  30
+End of Inner loop
+ 
+End of outer loop
+*/
+```
+# 26. Sql Case Statement
+- similar like if else also called as conditional statements.
+- hum isse Select,update see last point...har jagah use kar sakte, jabki if else mein nhi 
+- aap multiple condition define kar sakte.
+
+![Alt text](image-215.png)
+```sql
+use MyDatabase;
+
+Create table student2
+(
+	rollNo int,
+	studentName varchar(100),
+	city Varchar(50),
+	english int,
+	math int,
+	science int,
+	Gender varchar(10)
+)
+
+Insert Into student2 Values(1,'John','London',32,55,2,'M');
+Insert Into student2 Values(2,'Moly','New City',12,34,3,'F');
+Insert Into student2 Values(3,'Thor','Noida',44,87,11,'M');
+Insert Into student2 Values(4,'Dean','Calcutta',36,90,21,'F');
+Insert Into student2 Values(5,'Brian','Banglore',78,87,23,'M');
+Insert Into student2 Values(6,'Keet','Noida',54,12,45,'M');
+Insert Into student2 Values(7,'Suzan','Noida',21,45,32,'M');
+Insert Into student2 Values(8,'Keep','Faridabad',67,45,67,'F');
+Insert Into student2 Values(9,'Lovely','NCR',43,6,54,'M');
+Insert Into student2 Values(10,'Linda','New Delhi',56,34,23,'F');
+
+Select * from Student2;
+/*
+1	John	London		32	55	2	M
+2	Moly	New City	12	34	3	F
+3	Thor	Noida		44	87	11	M
+4	Dean	Calcutta	36	90	21	F
+5	Brian	Banglore	78	87	23	M
+6	Keet	Noida		54	12	45	M
+7	Suzan	Noida		21	45	32	M
+8	Keep	Faridabad	67	45	67	F
+9	Lovely	NCR			43	6	54	M
+10	Linda	New Delhi	56	34	23	F
+
+Q- Ab hume student marks ke total ke hisab se
+   un sabko grade assign karna hai?
+
+   - total marks ke upar condition lagenge aur uske hisab 
+       se grade diya javenga
+	- total > 150 Grade A
+	- 100 to 150  then B
+	- so on so forth
+
+	-- Use concept of case statement
+*/
+/*
+ 1.) Select with Case statement
+*/
+Select rollNo,studentName,city,english,math,science,Gender,
+  Student_Grade =  --Add a new col
+	Case 
+		when (english + math + science) > 150 then 'A'
+		when (english + math + science) <= 150 AND  (english + math + science) > 100  then 'B'
+		when (english + math + science) <= 100 AND  (english + math + science) > 60  then 'C'
+		Else 'Fail'
+	 End
+from Student2;
+
+/*
+  Naya col Student_Grade generate honga keval display ke liye.
+                                       Student_Grade
+1	John	London		32	55	2	M	C
+2	Moly	New City	12	34	3	F	Fail
+3	Thor	Noida		44	87	11	M	B
+4	Dean	Calcutta	36	90	21	F	B
+5	Brian	Banglore	78	87	23	M	A
+6	Keet	Noida		54	12	45	M	B
+7	Suzan	Noida		21	45	32	M	C
+8	Keep	Faridabad	67	45	67	F	A
+9	Lovely	NCR			43	6	54	M	B
+10	Linda	New Delhi	56	34	23	F	B
+
+Select statemnet har row ko fetch kar raha hai
+  and condition check kar ke result apply kar raha hai
+
+Remeber :
+   ye db mein update nhi hua..
+   ye sirf display ho riya hai
+*/
+```
+### Case statement in uPdate
+```sql
+/*
+ Case statement in Update query
+*/
+Alter table Student2
+ add  Grade Varchar(10);
+
+ Select * from Student2;
+/*
+										Grade
+1	John	London		32	55	2	M	NULL
+2	Moly	New City	12	34	3	F	NULL
+3	Thor	Noida		44	87	11	M	NULL
+4	Dean	Calcutta	36	90	21	F	NULL
+5	Brian	Banglore	78	87	23	M	NULL
+6	Keet	Noida		54	12	45	M	NULL
+7	Suzan	Noida		21	45	32	M	NULL
+8	Keep	Faridabad	67	45	67	F	NULL
+9	Lovely	NCR			43	6	54	M	NULL
+10	Linda	New Delhi	56	34	23	F	NULL
+
+Target :
+ Hume student ke total ke hisab se usko grade
+   assign karna hia, aur Grade col ko update 
+    karna hai
+*/
+
+Update Student2 
+   Set Grade =
+   Case
+		when (english + math + science) > 150 then 'A'
+		when (english + math + science) <= 150 AND  (english + math + science) > 100  then 'B'
+		when (english + math + science) <= 100 AND  (english + math + science) > 60  then 'C'
+		Else 'Fail'
+   End
+
+Select * from Student2;
+/*
+1	John	London		32	55	2	M	C
+2	Moly	New City	12	34	3	F	Fail
+3	Thor	Noida		44	87	11	M	B
+4	Dean	Calcutta	36	90	21	F	B
+5	Brian	Banglore	78	87	23	M	A
+6	Keet	Noida		54	12	45	M	B
+7	Suzan	Noida		21	45	32	M	C
+8	Keep	Faridabad	67	45	67	F	A
+9	Lovely	NCR			43	6	54	M	B
+10	Linda	New Delhi	56	34	23	F	B
+*/
+```
+### Case Statement with insert
+```sql
+
+Create table student3
+(
+	rollNo int,
+	studentName varchar(100),
+	city Varchar(50),
+	english int,
+	math int,
+	science int,
+	Gender varchar(10)
+)
+
+Insert Into Student3 Values(1,'John','London',32,55,2,'M');
+Insert Into Student3 Values(2,'Moly','New City',12,34,3,'F');
+Insert Into Student3 Values(3,'Thor','Noida',44,87,11,'M');
+Insert Into Student3 Values(4,'Dean','Calcutta',36,90,21,'F');
+Insert Into Student3 Values(5,'Brian','Banglore',78,87,23,'M');
+Insert Into Student3 Values(6,'Keet','Noida',54,12,45,'M');
+Insert Into Student3 Values(7,'Suzan','Noida',21,45,32,'M');
+Insert Into Student3 Values(8,'Keep','Faridabad',67,45,67,'F');
+Insert Into Student3 Values(9,'Lovely','NCR',43,6,54,'M');
+Insert Into Student3 Values(10,'Linda','New Delhi',56,34,23,'F');
+
+Select * from Student3;
+/*
+1	John	London		32	55	2	M
+2	Moly	New City	12	34	3	F
+3	Thor	Noida		44	87	11	M
+4	Dean	Calcutta	36	90	21	F
+5	Brian	Banglore	78	87	23	M
+6	Keet	Noida		54	12	45	M
+7	Suzan	Noida		21	45	32	M
+8	Keep	Faridabad	67	45	67	F
+9	Lovely	NCR			43	6	54	M
+10	Linda	New Delhi	56	34	23	F
+
+	CAse statement with Insert
+
+Target:
+   hum jab bhi koyi 1 insert kare to M store ho Gender mein
+*/
+
+Declare @Gender Varchar(1)
+Set @Gender = 1
+Insert Into Student3(rollNo,studentName,city,english,math,science,Gender)
+  Values(24,'Mickel','London',78,65,45,@Gender);
+
+Select * from Student3;
+/*
+1	John	London		32	55	2	M
+2	Moly	New City	12	34	3	F
+3	Thor	Noida		44	87	11	M
+4	Dean	Calcutta	36	90	21	F
+5	Brian	Banglore	78	87	23	M
+6	Keet	Noida		54	12	45	M
+7	Suzan	Noida		21	45	32	M
+8	Keep	Faridabad	67	45	67	F
+9	Lovely	NCR			43	6	54	M
+10	Linda	New Delhi	56	34	23	F
+24	Mickel	London		78	65	45	1
+
+sala Gender ke andar 1 insert hua
+  apna target hai ki M insert hone ko hona
+*/
+Declare @Gender Varchar(1)
+Set @Gender = 1
+Insert Into Student3(rollNo,studentName,city,english,math,science,Gender)
+  Values(26,'Mickel','London',78,65,45, Case When @Gender=1 then 'M' Else 'F' END);
+
+Select * from Student3;
+/*	
+1	John	London		32	55	2	M
+2	Moly	New City	12	34	3	F
+3	Thor	Noida		44	87	11	M
+4	Dean	Calcutta	36	90	21	F
+5	Brian	Banglore	78	87	23	M
+6	Keet	Noida		54	12	45	M
+7	Suzan	Noida		21	45	32	M
+8	Keep	Faridabad	67	45	67	F
+9	Lovely	NCR			43	6	54	M
+10	Linda	New Delhi	56	34	23	F
+24	Mickel	London		78	65	45	M
+26	Mickel	London		78	65	45	M
+*/
+```
+### Case statement with order by clause
+```sql
+/*
+	Case Statement with Order by clause
+*/
+
+select * from Student2 
+    order by city;
+/*
+5	Brian	Banglore	78	87	23	M	A
+4	Dean	Calcutta	36	90	21	F	B
+8	Keep	Faridabad	67	45	67	F	A
+1	John	London		32	55	2	M	C
+9	Lovely	NCR			43	6	54	M	B
+2	Moly	New City	12	34	3	F	Fail
+10	Linda	New Delhi	56	34	23	F	B
+3	Thor	Noida		44	87	11	M	B
+6	Keet	Noida		54	12	45	M	B
+7	Suzan	Noida		21	45	32	M	C
+
+Target :
+  Aapka yadi Male count 5 se jayada hai 
+    to sort via city 
+	or sort via studentName
+*/
+select * from Student2 
+    order by 
+	  Case
+			When (Select count(gender) from student2 where Gender='M') > 5 Then city
+			Else studentName
+	   End;
+/*
+5	Brian	Banglore	78	87	23	M	A
+4	Dean	Calcutta	36	90	21	F	B
+8	Keep	Faridabad	67	45	67	F	A
+1	John	London		32	55	2	M	C
+9	Lovely	NCR			43	6	54	M	B
+2	Moly	New City	12	34	3	F	Fail
+10	Linda	New Delhi	56	34	23	F	B
+3	Thor	Noida		44	87	11	M	B
+6	Keet	Noida		54	12	45	M	B
+7	Suzan	Noida		21	45	32	M	C
+
+If you reverse the target
+*/
+select * from Student2 
+    order by 
+	  Case
+			When (Select count(gender) from student2 where Gender='M') > 5 Then studentName
+			Else city
+	   End;
+
+/*
+5	Brian	Banglore	78	87	23	M	A
+4	Dean	Calcutta	36	90	21	F	B
+1	John	London		32	55	2	M	C
+8	Keep	Faridabad	67	45	67	F	A
+6	Keet	Noida		54	12	45	M	B
+10	Linda	New Delhi	56	34	23	F	B
+9	Lovely	NCR			43	6	54	M	B
+2	Moly	New City	12	34	3	F	Fail
+7	Suzan	Noida		21	45	32	M	C
+3	Thor	Noida		44	87	11	M	B
+*/
+```
+# 27. Diff between Where and having clause
+- select ke baad where condtion hota hai
+- usek baad group by
+- uske baad having caluse
+- see dig
+- where cluase  mein aap aggregate function use nhi kar sakte 
+- but having clause mein kar sakte
+
+![Alt text](image-216.png)
+```sql
+use MyDatabase;
+
+Select * from Employee4 
+  order by deptID;
+/*
+1002	Smith	1	4000	2020
+1007	Joshep	1	7800	2020
+1010	David	1	1100	2022
+1001	John	2	3000	2021
+1009	Mangu	2	2200	2022
+1004	Milia	2	5500	2021
+1005	Linda	2	3200	2022
+1006	Tony	3	6700	1990
+1003	King	3	6000	2019
+1009	Alice	3	2100	2021
+
+Target  :
+  har dept ke kitne emp hai usko calculate karna
+*/
+
+Select deptId, count(deptId) from Employee4
+  Group by  deptId;
+/*
+1	3
+2	4
+3	3
+
+ humen group kiya on the basis of deptid
+  and then count kiya kitne emp hai particaular dept mein
+
+Target :
+  Hume keval dept 1 aur 3 ka data chahi
+*/
+Select deptId, count(deptId) from Employee4
+  where deptId In(1,3)
+  Group by  deptId;
+/*
+1	3
+3	3
+
+Question : Jab aap where condition ko use karte
+     kya tab aap aggregate function use kar sakte.
+*/
+Select deptId, count(deptId) from Employee4
+  where sum(salary) > 2000
+  Group by  deptId;
+/*
+Error:
+An aggregate may not appear in the WHERE clause unless it is in a subquery contained
+    in a HAVING clause or a select list, and the column being aggregated is an outer reference.
+
+conclusion:
+  aap where clause ke sath aggregate function nhi use kar sakte.
+*/
+```
+![Alt text](image-217.png)
+### having clause eg
+```sql
+/*
+Where and having clause
+
+Target :
+   Find the total salary in dept 1 and 3  
+     and group the total salary should be 
+	   greater than 13000
+*/
+
+Select deptId,sum(salary) as TotalSal 
+   from Employee4 
+     where deptId In (1,3)
+	 Group by deptId
+/*
+1	12900
+3	14800
+*/
+Select deptId,sum(salary) as TotalSal 
+   from Employee4 
+     where deptId In (1,3)
+	 Group by deptId
+	 Having sum(salary) > 13000
+/*
+3	14800
+*/
+```
+![Alt text](image-218.png)
+# 28. If else nested in sql

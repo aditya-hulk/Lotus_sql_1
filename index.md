@@ -22,3 +22,10 @@
 ### 21. Sql sub query 
 ### 22. Windows Function
 ### 23. Sql Roll Up and Cube
+### 24. Sql stored Procedure
+### 25. Sql loops
+### 26. Sql Case Statement
+### 27. Diff between Where and having clause
+### 28. If else nested in sql
+
+
