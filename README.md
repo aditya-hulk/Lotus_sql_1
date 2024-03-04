@@ -6963,3 +6963,491 @@ Select deptId,sum(salary) as TotalSal
 ```
 ![Alt text](image-218.png)
 # 28. If else nested in sql
+- also called as conditional statement or decision making statement
+
+![Alt text](image-219.png)![Alt text](image-220.png)
+```sql
+use MyDatabase;
+
+-- Use of If Statement
+/*
+	- if mein jo bhi condition likhe uska result boolean i.e true/false hona chaiye
+
+*/
+If(1=1)
+	print 'True Condition';
+Else
+	Print 'False condtion';
+-- True Condition
+
+If(1=2)
+	print 'True Condition';
+Else
+	Print 'False condtion';
+-- False Condition
+
+If(1=1)
+	print 'True Condition';
+	print '1st statement';
+Else
+	Print 'False condtion';
+
+-- Can't execute since multiple statemnet ke liye block lagana hota hai
+
+If(1=1)
+  Begin
+	print 'True Condition';
+	print '1st statement';
+  End
+Else
+  Begin
+	Print 'False condtion';
+	Print '2nd statement';
+  End
+/*
+True Condition
+1st statement
+
+Question: 
+  Yadi hum if mein boolean expression nhi likhe tab
+*/
+
+If(1)
+  Begin
+	print 'True Condition';
+	print '1st statement';
+  End
+Else
+  Begin
+	Print 'False condtion';
+	Print '2nd statement';
+  End
+/*
+An expression of non-boolean type specified in a context where a condition is expected, near 'Begin'.
+
+Na chalbe
+*/
+```
+### Eg
+```sql
+
+--Hume percentage ke basis par Grading karni hai
+
+--Declare Variables
+Declare @RollNo Int;
+Declare @Eng Int;
+Declare @Math Int;
+Declare @Hindi Int;
+Declare @Total Int;
+Declare @Per Int;
+
+--Initialize The variable
+Set @RollNo = 100;
+Set @Eng = 87;
+Set @Math = 78;
+Set @Hindi = 56;
+Set @Total = @Eng + @Math + @Hindi;
+Set @Per = @Total / 3;
+
+	Print Concat('RollNo:',@RollNo);
+	Print Concat('Total:',@Total);
+	Print Concat('Percentag:',@Per);
+
+if @Per > 80
+	Begin 
+		Print 'Grade A'
+	End
+Else
+	Begin
+		Print 'Fail';
+	End
+/*
+RollNo:		100
+Total:		221
+Percentag:	73
+		Fail
+
+*/
+```
+![Alt text](image-221.png)
+```sql
+
+--Nested if else eg
+
+--Declare Variables
+Declare @RollNo Int;
+Declare @Eng Int;
+Declare @Math Int;
+Declare @Hindi Int;
+Declare @Total Int;
+Declare @Per Int;
+
+--Initialize The variable
+Set @RollNo = 100;
+Set @Eng = 87;
+Set @Math = 78;
+Set @Hindi = 56;
+Set @Total = @Eng + @Math + @Hindi;
+Set @Per = @Total / 3;
+
+	Print Concat('RollNo:',@RollNo);
+	Print Concat('Total:',@Total);
+	Print Concat('Percentag:',@Per);
+
+if @Per > 80
+	Begin 
+		Print 'Grade A'
+	End
+Else If @Per > 60 And @Per<= 80
+	Begin
+		Print 'Grade B';
+	End
+Else If @Per > 40 And @Per<= 60
+	Begin
+		Print 'Grade C';
+	End
+Else 
+	Begin
+		Print 'Fail';
+	End
+/*
+RollNo:100
+Total:221
+Percentag:73
+Grade B
+
+Aap number change karke pura pgm chala sakte ho.
+*/
+```
+### If Exists
+```sql
+/*
+	Use of If statment to check record in table.
+*/
+Select * from Student2;
+/*
+1	John	London		32	55	2	M	C
+2	Moly	New City	12	34	3	F	Fail
+3	Thor	Noida		44	87	11	M	B
+4	Dean	Calcutta	36	90	21	F	B
+5	Brian	Banglore	78	87	23	M	A
+6	Keet	Noida		54	12	45	M	B
+7	Suzan	Noida		21	45	32	M	C
+8	Keep	Faridabad	67	45	67	F	A
+9	Lovely	NCR			43	6	54	M	B
+10	Linda	New Delhi	56	34	23	F	B
+
+Question:
+  Particular rollNo/city/name exist hai bhi ya nhi in Studen2 table
+*/
+
+If Exists(Select RollNo from Student2 where RollNo =1)
+	  Begin
+		Print 'Roll No exists';
+	 End
+Else
+	Begin
+		Print 'Roll No does not exists';
+	 End
+-- Roll No exists
+
+If Exists(Select RollNo from Student2 where RollNo =11)
+	  Begin
+		Print 'Roll No exists';
+	 End
+Else
+	Begin
+		Print 'Roll No does not exists';
+	 End
+--Roll No does not exists
+```
+# 29. Sql Transactions
+- sql transactions ka matlab hai group of 1 or multiple sql statements.
+- isko hum single logical unit bhi kehte hai
+- kabhi kabhi aapko multiple table mein multiple query chalana hota hai, kyuki sare interrelated hai.
+- Eg aapko 4 table mein insert karna hai data, and yadi 1 bhi insert query kaam nhi kari to aapki bachi sari insert entry bhi cancel honi chaiye.
+- best is ATm eg.
+- issi single unit ko hum  Transition kehte hai.
+- single unit of work ke sare Transaction ek to success honge, aur yadi ek bhi usme ka bhaska to pura bhaskenga.
+
+![Alt text](image-223.png) 
+### ACID
+- This is the property of the transaction
+- atomicity= ek to sare ke sare operation honge tab success nhi to failure. Check dig.
+- cosistent = yadi ek baar transaction success yane commit ho gya tab uski state change nhi hona chaiye.. 3k hi rehna chaiye Now onwards,check dig.
+- isolation = mane atm se kayi sare customer transaction kar sakte hai, unki transaction differ honi chaiye; Mix nhi hona chaiye
+- durability = ek baar transaction success/commit ho gya aur baad mein yadi sys fail bhi hua; toh restart hone ke baad user ka bal 3k rehna chaiye na ki previous 5k.
+
+![Alt text](image-224.png)
+### Modes of transaction
+![Alt text](image-225.png)
+- by default autocomit, aap koyi bhi transaction use nhi kar rahe tab autocommit rahenga.
+- U can control the tranasaction in case of Implcit, lekin transaction aapka start aur end kab honga ye aap define nhi kar sakte
+- Explicit = isme start and end dono define kar sakte.
+### TCL
+![Alt text](image-226.png)
+### Autocommit Transaction
+```sql
+use MyDatabase;
+/*
+ Autocommit Transaction / By default transaction
+ - aap jab koyi transaction use nhi kar rahe ho tab autocommit.
+ - In this case u cannot rollback the data.
+
+Transaction ko hum sql server par kaise use karte hai.
+*/
+Create table EmployeeTrans
+(
+	emp_id Int,
+	dept Int,
+	Age Int,
+	Salary Int
+)
+
+Insert Into EmployeeTrans Values(101,1,21,9000);
+Insert Into EmployeeTrans Values(102,2,45,211);
+Insert Into EmployeeTrans Values(104,3,55,8999);
+
+Select * from EmployeeTrans;
+/*
+101	1	21	9000
+102	2	45	211
+104	3	55	8999
+
+Single Unit of work
+1st statement = Hum EmployeeTrans mein ek naya record insert karenge
+2nd sta = 101 id ki sal ko update kar rahe hai
+3rd st = emp 104 ko delete kar rahe hai
+
+Select @Trancount = ye batata hai ki current session mein aapki
+   kitni transaction execute ho rahi hai.
+Jab data commit to @Transcount = 0
+ Autocommit mein transaction count 0
+*/
+
+Insert Into EmployeeTrans Values(105,3,55,8999);
+Update EmployeeTrans Set Salary= 12000 where emp_id = 101;
+Delete from EmployeeTrans where emp_id = 104; 
+Select @@TRANCOUNT
+/*
+Output : 0
+
+*/
+
+Select * from EmployeeTrans;
+/*
+101	1	21	12000
+102	2	45	211
+105	3	55	8999
+
+Commit ke baad TranCount 0 hota hai
+Autocommit mein 0 rehta hai
+*/
+```
+### Implicit Commit transaction
+```sql
+/*
+	Implicit Transaction :
+	 - In ordert to define implicit transaction,
+	            we need to enable the Implicit Transaction
+	 - Sql Server automatically starts the transaction with any following statements.
+		 ALTER,CREATE,DELETE,DROP,FETCH,GRANT,INSERT,OPEN,REVOKE,SELECT, TRUNCATE AND UPDATE.
+	 - Use COMMIT(permanat save) or ROLLBACK(cancel transaction) always.
+*/
+Insert Into EmployeeTrans Values(108,3,55,8999);
+Select * from EmployeeTrans;
+/*
+101	1	21	12000
+102	2	45	211
+108	3	55	8999
+105	3	55	8999
+
+Single Unit of Work
+1) Data ko insert
+2) Update
+3) Delete
+*/
+
+-- Let's ON the implicit_transaction 
+-- It start and end automatically
+Set IMPLICIT_TRANSACTIONS ON
+
+--Single Unit of Work
+Insert Into EmployeeTrans Values(116,2,78,6000);
+Update EmployeeTrans Set Salary= 50000 where emp_id = 101;
+Delete from EmployeeTrans where emp_id = 108;
+
+Select @@TRANCOUNT As OpenTransactions
+/*Output 1
+ Commit se pehle 1 transaction
+  usme statement 3 hai
+*/
+Commit;
+Select @@TRANCOUNT As OpenTransactions
+--Output 0
+
+Select * from EmployeeTrans;
+/*
+101	1	21	50000
+102	2	45	211
+105	3	55	8999
+116	2	78	6000
+*/
+```
+### Implicit RollBack Transaction
+```sql
+Select * from EmployeeTrans;
+/*
+101	1	21	50000
+102	2	45	211
+105	3	55	8999
+116	2	78	6000
+*/
+Set IMPLICIT_TRANSACTIONS ON
+
+--Single Unit of Work
+Insert Into EmployeeTrans Values(115,2,78,6000);
+Update EmployeeTrans Set Salary= 150000 where emp_id = 101;
+Delete from EmployeeTrans where emp_id = 105;
+
+Select @@TRANCOUNT As OpenTransactions
+/*Output 1
+Transaction before rollback is 1
+*/
+Rollback;
+Select @@TRANCOUNT As OpenTransactions
+--Output 0 after rollback transaction count 0
+
+Select * from EmployeeTrans;
+/*
+101	1	21	50000
+102	2	45	211
+105	3	55	8999
+116	2	78	6000
+
+No change in data due to RollBack
+*/
+```
+### Some more
+```sql
+/*
+AAp conditon ke sath bhi isko Rollback and commit kar sakte ho
+*/
+Set IMPLICIT_TRANSACTIONS ON
+
+Insert Into EmployeeTrans Values(115,2,78,6000);
+Update EmployeeTrans Set Salary= 150000 where emp_id = 101;
+Delete from EmployeeTrans where emp_id = 105;
+
+--Declare Variable
+Declare @Choice Int;
+
+--Initialize it
+Set @Choice=1;
+
+--Check the condition
+If @Choice = 1
+	Begin
+		Commit;
+	End
+Else 
+	Begin
+		Rollback;
+	End
+
+Select * from EmployeeTrans;
+/*
+101	1	21	150000
+102	2	45	211
+115	2	78	6000
+116	2	78	6000
+*/
+
+-- Execute same thing provide 
+ -- if @Choice = 0 condtion fail else block execute and there will be rollback so no change.
+```
+### Explicit Transaction
+```sql
+/*
+	Explicit Transaction:
+	1) we start to use BEGIN TRANSACTION command,since this statement identifies the starting 
+	    point of the explicit transaction.
+	2) Use COMMIT(permanat save) or ROLLBACK(cancel transaction) always.
+*/
+Select * from EmployeeTrans;
+/*
+101	1	21	150000
+102	2	45	211
+115	2	78	6000
+116	2	78	6000
+*/
+
+BEGIN TRANSACTION
+-- yAHA HUM bata rahe hai,ki ab yaha se hamara transaction begin/start ho raha hai
+Insert Into EmployeeTrans Values(125,2,78,6000);
+Update EmployeeTrans Set Salary= 24000 where emp_id = 101;
+Delete from EmployeeTrans where emp_id = 115;
+
+Declare @Choice Int;
+Set @Choice=1;
+If @Choice = 1
+	Begin
+		Commit;
+	End
+Else 
+	Begin
+		Rollback;
+	End
+
+Select * from EmployeeTrans;
+/*
+101	1	21	24000
+102	2	45	211
+125	2	78	6000
+116	2	78	6000
+*/
+```
+### Savepoint command
+```sql
+/*
+	Savepoint command:
+	- YOU CAN PARTIALLY COMMIT OR ROLLBACK UPTO CERTAIN POINT
+
+	Syntax: FOR COMMIT
+	SAVE TRANSACTION SAVEPOINT_NAME
+
+	The ROLLBACK COMMAND is used to undo a group of transaction
+	Syntax:
+	ROLLBACK TRANSACTION SAVEPOINT_NAME
+	
+*/
+
+SELECT * FROM EmployeeTrans;
+/*
+101	1	21	24000
+102	2	45	211
+125	2	78	6000
+116	2	78	6000
+
+1 transaction save
+ 3 delete rollback
+*/
+BEGIN TRANSACTION
+	Insert Into EmployeeTrans Values(150,2,78,6000);
+	SAVE TRANSACTION DELTAPOINT
+	DELETE EmployeeTrans WHERE emp_id=102;
+	DELETE EmployeeTrans WHERE emp_id=125;
+	DELETE EmployeeTrans WHERE emp_id=116;
+	ROLLBACK TRANSACTION DELTAPOINT
+  COMMIT; -- YE FINAL WALA COMMIT HAI
+
+SELECT * FROM EmployeeTrans;
+/*
+101	1	21	24000
+102	2	45	211
+150	2	78	6000
+125	2	78	6000
+116	2	78	6000
+*/
+```
+# 30. Sql Error Handling

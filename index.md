@@ -27,5 +27,7 @@
 ### 26. Sql Case Statement
 ### 27. Diff between Where and having clause
 ### 28. If else nested in sql
+### 29. Sql Transactions
+### 30. Sql Error Handling
 
 
